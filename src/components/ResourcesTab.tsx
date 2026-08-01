@@ -2,11 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/context/StoreContext";
-import {
-  analyzeResourceAllocation,
-  formatAllocPct,
-  overloadSpansInWindow,
-} from "@/lib/allocation";
+import { analyzeResourceAllocation, formatAllocPct } from "@/lib/allocation";
 import {
   addAssignmentForResource,
   addTaskToAssignment,
@@ -31,7 +27,7 @@ import styles from "./ResourcesTab.module.css";
 
 const COLS = [
   { id: "resourceName", label: "Resource", width: 200 },
-  { id: "resourceType", label: "Type", width: 110 },
+  { id: "resourceType", label: "Role", width: 110 },
   { id: "team", label: "Team", width: 140 },
   { id: "skills", label: "Skills", width: 140 },
   { id: "projects", label: "Projects", width: 140 },
@@ -173,6 +169,15 @@ export function ResourcesTab() {
     const out: GanttRow[] = [];
 
     for (const row of rows) {
+      // Assignments (stints) that hold a conflicting task — underline these on
+      // the top-level resource row so conflicts read at a glance, unexpanded.
+      const conflictAssignmentIds = new Set<string>();
+      for (const { assignment, tasks } of row.assignmentRows) {
+        if (tasks.some((t) => row.conflictTaskIds.has(t.id))) {
+          conflictAssignmentIds.add(assignment.id);
+        }
+      }
+
       const assignmentBars: GanttBar[] = row.assignments.map((a) => {
         const project = data.projects.find((p) => p.id === a.projectId);
         const projectIndex = data.projects.findIndex(
@@ -185,27 +190,15 @@ export function ResourcesTab() {
           label: project?.name ?? "Project",
           color: projectBarColor(a.projectId, projectIndex),
           kind: "assignment",
+          conflict: conflictAssignmentIds.has(a.id),
         };
       });
-
-      const overloadBars: GanttBar[] = overloadSpansInWindow(
-        row.assignments,
-        ganttWindow.start,
-        ganttWindow.end
-      ).map((span, i) => ({
-        id: `overload_${row.resource.id}_${i}`,
-        start: span.start,
-        end: span.end,
-        label: "Heavy",
-        sublabel: "double-booked",
-        kind: "overload",
-      }));
 
       out.push({
         id: row.resource.id,
         label: row.resource.name,
         sublabel: formatAllocPct(row.allocation.allocPct),
-        bars: [...assignmentBars, ...overloadBars],
+        bars: assignmentBars,
       });
 
       if (!expandedResources.has(row.resource.id)) continue;
@@ -240,21 +233,16 @@ export function ResourcesTab() {
             start: task.start,
             end: task.end,
             label: task.title,
-            color: inConflict ? "var(--danger)" : color,
+            color,
             variant: "task",
+            conflict: inConflict,
           });
         }
       }
     }
 
     return out;
-  }, [
-    rows,
-    data.projects,
-    expandedResources,
-    collapsedAssignments,
-    ganttWindow,
-  ]);
+  }, [rows, data.projects, expandedResources, collapsedAssignments]);
 
   function syncVertical(source: "grid" | "gantt") {
     const grid = bodyScrollRef.current;
@@ -416,7 +404,7 @@ export function ResourcesTab() {
       const field =
         colId === "resourceType" ? "type" : colId === "team" ? "team" : "notes";
       const label =
-        colId === "resourceType" ? "Type" : colId === "team" ? "Team" : "Notes";
+        colId === "resourceType" ? "Role" : colId === "team" ? "Team" : "Notes";
       const managerLocked =
         (colId === "resourceType" || colId === "team") && !manager;
       return (

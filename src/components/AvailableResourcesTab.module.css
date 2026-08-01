@@ -32,6 +32,51 @@
   background: var(--ink-soft);
 }
 
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.addPanel {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.5rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
+  box-sizing: border-box;
+}
+
+.addLabel {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 0.15rem;
+}
+
+.input {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.5rem;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(47, 111, 94, 0.15);
+}
+
+.nameInput {
+  min-width: 200px;
+}
+
 .hint {
   font-size: 0.72rem;
   color: var(--muted);
@@ -150,4 +195,20 @@ tr:hover .deleteBtn {
   padding: 2rem 1rem;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.added {
+  animation: addedFlash 2.5s ease-out;
+}
+
+@keyframes addedFlash {
+  0% {
+    background: rgba(47, 111, 94, 0.35);
+  }
+  35% {
+    background: rgba(47, 111, 94, 0.35);
+  }
+  100% {
+    background: transparent;
+  }
 }

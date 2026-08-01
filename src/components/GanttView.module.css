@@ -253,6 +253,18 @@
   min-width: 0;
 }
 
+/** Conflicting task: keep the project color, mark it with a red underline. */
+.conflictBar::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--danger);
+  pointer-events: none;
+}
+
 .overloadBar {
   top: 4px;
   height: calc(var(--row-height) - 8px);

@@ -180,6 +180,8 @@ export interface GanttBar {
   milestone?: boolean;
   /** Free / open capacity marker (not an assignment) */
   kind?: "assignment" | "gap" | "overload";
+  /** Task overlaps another project's task — mark with an underline, not a fill. */
+  conflict?: boolean;
 }
 
 export interface GanttRow {
@@ -195,6 +197,8 @@ export interface GanttRow {
   emphasis?: boolean;
   /** Lighter, inset bar for task rows (vs project stints) */
   variant?: "project" | "task";
+  /** Task overlaps another project's task — mark with an underline, not a fill. */
+  conflict?: boolean;
   /** Multiple bars on one row (e.g. resource with several allocations) */
   bars?: GanttBar[];
 }
@@ -461,6 +465,7 @@ export function GanttView({
                         sublabel: row.sublabel,
                         color: row.color,
                         milestone: row.milestone,
+                        conflict: row.conflict,
                       },
                     ]
                   : [];
@@ -495,10 +500,11 @@ export function GanttView({
                       : bar.kind === "overload"
                         ? styles.overloadBar
                         : "";
+                  const conflictClass = bar.conflict ? styles.conflictBar : "";
                   return (
                     <div
                       key={bar.id}
-                      className={`${styles.bar} ${bar.milestone ? styles.milestone : ""} ${row.emphasis || row.variant === "project" ? styles.emphasisBar : ""} ${row.variant === "task" ? styles.taskBar : ""} ${clickable ? styles.clickable : ""} ${selected ? styles.selected : ""} ${kindClass}`}
+                      className={`${styles.bar} ${bar.milestone ? styles.milestone : ""} ${row.emphasis || row.variant === "project" ? styles.emphasisBar : ""} ${row.variant === "task" ? styles.taskBar : ""} ${clickable ? styles.clickable : ""} ${selected ? styles.selected : ""} ${kindClass} ${conflictClass}`}
                       style={{
                         ...style,
                         ...(isMeta

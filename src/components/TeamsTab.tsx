@@ -2,11 +2,7 @@
 
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useStore } from "@/context/StoreContext";
-import {
-  analyzeResourceAllocation,
-  formatAllocPct,
-  overloadSpansInWindow,
-} from "@/lib/allocation";
+import { analyzeResourceAllocation, formatAllocPct } from "@/lib/allocation";
 import { assignmentsForResource, filteredSortedResources } from "@/lib/query";
 import { formatDate } from "@/lib/dates";
 import { FilterSortBar } from "./FilterSortBar";
@@ -20,7 +16,7 @@ import styles from "./TeamsTab.module.css";
 
 const COLS = [
   { id: "name", label: "Team / Resource", width: 220 },
-  { id: "type", label: "Type", width: 130 },
+  { id: "type", label: "Role", width: 130 },
   { id: "people", label: "People", width: 64 },
   { id: "tasks", label: "Tasks", width: 64 },
   { id: "active", label: "Active", width: 64 },
@@ -158,25 +154,12 @@ export function TeamsTab() {
         };
       });
 
-      const teamOverload = overloadSpansInWindow(
-        group.allAssignments,
-        ganttWindow.start,
-        ganttWindow.end
-      ).map((span, i) => ({
-        id: `team_overload_${group.team}_${i}`,
-        start: span.start,
-        end: span.end,
-        label: "Heavy",
-        sublabel: "team load",
-        kind: "overload" as const,
-      }));
-
       out.push({
         id: `team_row_${group.team}`,
         label: group.team,
         sublabel: formatAllocPct(group.avgAllocPct),
         emphasis: true,
-        bars: [...assignmentBars, ...teamOverload],
+        bars: assignmentBars,
       });
 
       if (!expanded.has(group.team)) continue;
@@ -196,30 +179,18 @@ export function TeamsTab() {
             kind: "assignment",
           };
         });
-        const overloadBars = overloadSpansInWindow(
-          m.assignments,
-          ganttWindow.start,
-          ganttWindow.end
-        ).map((span, i) => ({
-          id: `overload_${m.resource.id}_${i}`,
-          start: span.start,
-          end: span.end,
-          label: "Heavy",
-          sublabel: "double-booked",
-          kind: "overload" as const,
-        }));
 
         out.push({
           id: `member_row_${m.resource.id}`,
           label: m.resource.name,
           sublabel: formatAllocPct(m.allocation.allocPct),
-          bars: [...bars, ...overloadBars],
+          bars,
         });
       }
     }
 
     return out;
-  }, [teams, expanded, data.projects, data.resources, ganttWindow]);
+  }, [teams, expanded, data.projects, data.resources]);
 
   function syncVertical(source: "grid" | "gantt") {
     const grid = bodyScrollRef.current;

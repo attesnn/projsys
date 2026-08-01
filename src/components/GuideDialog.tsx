@@ -93,7 +93,6 @@ export function GuideDialog({ onClose }: GuideDialogProps) {
               <strong>Free %</strong> = weekdays with no booking;{" "}
               <strong>Busy %</strong> = weekdays with ≥2 overlapping work
               bookings. Time off blocks free capacity without raising Alloc %.
-              Heavy overlays on the Gantt mark double-booked stretches.
             </p>
           </section>
 
@@ -103,7 +102,7 @@ export function GuideDialog({ onClose }: GuideDialogProps) {
               A conflict is two <strong>tasks</strong> on the{" "}
               <strong>same person</strong> for <strong>different projects</strong>{" "}
               whose date ranges overlap. Overlapping assignments alone are not
-              treated as conflicts (they show up as Busy % / Heavy instead).
+              treated as conflicts (they show up as Busy % instead).
             </p>
           </section>
 
