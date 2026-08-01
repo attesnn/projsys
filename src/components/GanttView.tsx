@@ -191,8 +191,10 @@ export interface GanttRow {
   color?: string;
   /** Single-day marker (optional) */
   milestone?: boolean;
-  /** Stronger bar for project rollup */
+  /** Stronger bar for project / assignment rollup */
   emphasis?: boolean;
+  /** Lighter, inset bar for task rows (vs project stints) */
+  variant?: "project" | "task";
   /** Multiple bars on one row (e.g. resource with several allocations) */
   bars?: GanttBar[];
 }
@@ -496,7 +498,7 @@ export function GanttView({
                   return (
                     <div
                       key={bar.id}
-                      className={`${styles.bar} ${bar.milestone ? styles.milestone : ""} ${row.emphasis ? styles.emphasisBar : ""} ${clickable ? styles.clickable : ""} ${selected ? styles.selected : ""} ${kindClass}`}
+                      className={`${styles.bar} ${bar.milestone ? styles.milestone : ""} ${row.emphasis || row.variant === "project" ? styles.emphasisBar : ""} ${row.variant === "task" ? styles.taskBar : ""} ${clickable ? styles.clickable : ""} ${selected ? styles.selected : ""} ${kindClass}`}
                       style={{
                         ...style,
                         ...(isMeta

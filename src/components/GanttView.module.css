@@ -223,7 +223,24 @@
 .emphasisBar {
   top: 6px;
   height: calc(var(--row-height) - 12px);
-  opacity: 0.92;
+  opacity: 0.95;
+}
+
+.emphasisBar .barLabel {
+  font-weight: 650;
+}
+
+/** Task bars: shorter + translucent so they read below project stints. */
+.taskBar {
+  top: 11px;
+  height: calc(var(--row-height) - 22px);
+  opacity: 0.72;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.taskBar .barLabel {
+  font-size: 0.64rem;
+  font-weight: 450;
 }
 
 .milestone {

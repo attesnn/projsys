@@ -223,6 +223,7 @@ export function ResourcesTab() {
           label: project?.name ?? "Project",
           color,
           emphasis: true,
+          variant: "project",
         });
 
         if (collapsedAssignments.has(assignment.id)) continue;
@@ -240,6 +241,7 @@ export function ResourcesTab() {
             end: task.end,
             label: task.title,
             color: inConflict ? "var(--danger)" : color,
+            variant: "task",
           });
         }
       }
