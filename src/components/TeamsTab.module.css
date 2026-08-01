@@ -87,11 +87,10 @@
   display: flex;
   width: max-content;
   min-width: 100%;
+  /* Match GanttView .row: content-box height + 1px border (not border-box). */
   height: var(--row-height);
   min-height: var(--row-height);
-  max-height: var(--row-height);
   border-bottom: 1px solid var(--border-subtle);
-  box-sizing: border-box;
 }
 
 .tr:hover {
