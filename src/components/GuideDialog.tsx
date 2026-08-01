@@ -49,8 +49,9 @@ export function GuideDialog({ onClose }: GuideDialogProps) {
               A <strong>Project</strong> books people through{" "}
               <strong>Assignments</strong> (stints with start/end dates).{" "}
               <strong>Tasks</strong> hang off an assignment — so each task belongs
-              to one project and one resource. Time off is a normal project named
-              “Time off”.
+              to one project and one resource. Each person also has a{" "}
+              <strong>Team</strong> for organizational grouping. Time off is a
+              normal project named “Time off”.
             </p>
           </section>
 
@@ -69,6 +70,11 @@ export function GuideDialog({ onClose }: GuideDialogProps) {
               <li>
                 <strong>Available resources</strong> — people master; Available
                 vs Booked for today.
+              </li>
+              <li>
+                <strong>Teams</strong> — people grouped by team with workload
+                from assigned tasks (active/todo/in progress/done) plus average
+                Alloc % / Busy % for the current month.
               </li>
               <li>
                 <strong>Skills</strong> — resource × skill matrix (levels 1–5).

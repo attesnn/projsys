@@ -7,6 +7,7 @@ import { isManager, isResourceRole, actingAsResource } from "@/lib/roles";
 import { ProjectsTab } from "./ProjectsTab";
 import { ResourcesTab } from "./ResourcesTab";
 import { AvailableResourcesTab } from "./AvailableResourcesTab";
+import { TeamsTab } from "./TeamsTab";
 import { SkillsTab } from "./SkillsTab";
 import { TasksTab } from "./TasksTab";
 import { StakeholderSwitcher } from "./StakeholderSwitcher";
@@ -17,6 +18,7 @@ const MANAGER_TABS: { id: TabId; label: string }[] = [
   { id: "projects", label: "Projects" },
   { id: "allocations", label: "Resource allocation" },
   { id: "available", label: "Available resources" },
+  { id: "teams", label: "Teams" },
   { id: "skills", label: "Skills" },
   { id: "tasks", label: "Tasks" },
 ];
@@ -110,6 +112,7 @@ export function AppShell() {
         {tab === "projects" && <ProjectsTab />}
         {tab === "allocations" && <ResourcesTab />}
         {tab === "available" && manager && <AvailableResourcesTab />}
+        {tab === "teams" && manager && <TeamsTab />}
         {tab === "skills" && manager && <SkillsTab />}
         {tab === "tasks" && <TasksTab />}
       </main>

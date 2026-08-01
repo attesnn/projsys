@@ -32,6 +32,7 @@ import styles from "./ResourcesTab.module.css";
 const COLS = [
   { id: "resourceName", label: "Resource", width: 200 },
   { id: "resourceType", label: "Type", width: 110 },
+  { id: "team", label: "Team", width: 140 },
   { id: "skills", label: "Skills", width: 140 },
   { id: "projects", label: "Projects", width: 140 },
   { id: "start", label: "Start", width: 100 },
@@ -44,8 +45,8 @@ const COLS = [
 
 type ColId = (typeof COLS)[number]["id"];
 
-const META_COLS_WIDTH = COLS.slice(1, 4).reduce((s, c) => s + c.width, 0);
-const AFTER_END_WIDTH = COLS.slice(6).reduce((s, c) => s + c.width, 0);
+const META_COLS_WIDTH = COLS.slice(1, 5).reduce((s, c) => s + c.width, 0);
+const AFTER_END_WIDTH = COLS.slice(7).reduce((s, c) => s + c.width, 0);
 
 function defaultWindow() {
   const now = new Date();
@@ -285,6 +286,8 @@ export function ResourcesTab() {
         return row.resource.name;
       case "resourceType":
         return row.resource.type;
+      case "team":
+        return row.resource.team;
       case "skills":
         return row.skills;
       case "projects":
@@ -373,21 +376,30 @@ export function ResourcesTab() {
       );
     }
 
-    if (colId === "resourceType" || colId === "notes") {
-      const field = colId === "resourceType" ? "type" : "notes";
-      const label = colId === "resourceType" ? "Type" : "Notes";
-      const typeLocked = colId === "resourceType" && !manager;
+    if (colId === "resourceType" || colId === "team" || colId === "notes") {
+      const field =
+        colId === "resourceType" ? "type" : colId === "team" ? "team" : "notes";
+      const label =
+        colId === "resourceType" ? "Type" : colId === "team" ? "Team" : "Notes";
+      const managerLocked =
+        (colId === "resourceType" || colId === "team") && !manager;
       return (
         <div className={styles.cellWrap}>
           <EditableCell
             value={value}
-            readOnly={typeLocked}
+            readOnly={managerLocked}
             title={
-              typeLocked
-                ? "Type is managed by the resource manager"
+              managerLocked
+                ? `${label} is managed by the resource manager`
                 : undefined
             }
-            placeholder={colId === "notes" ? "Add note…" : undefined}
+            placeholder={
+              colId === "notes"
+                ? "Add note…"
+                : colId === "team"
+                  ? "Team…"
+                  : undefined
+            }
             onCommit={(v) =>
               setData((prev) =>
                 updateResourceField(prev, row.resource.id, field, v)

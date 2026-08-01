@@ -5,6 +5,7 @@ import {
   clearFilters,
   setFilterProjectId,
   setFilterResourceId,
+  setFilterResourceTeam,
   setFilterResourceType,
   setSort,
   toggleSortDir,
@@ -20,17 +21,27 @@ interface FilterSortBarProps {
 
 export function FilterSortBar({ showClear = true }: FilterSortBarProps) {
   const { data, setData } = useStore();
-  const { filterProjectId, filterResourceId, filterResourceType, sortKey, sortDir } =
-    data.ui;
+  const {
+    filterProjectId,
+    filterResourceId,
+    filterResourceType,
+    filterResourceTeam,
+    sortKey,
+    sortDir,
+  } = data.ui;
   const manager = isManager(data);
   const asResource = isResourceRole(data);
   const active = Boolean(
     filterProjectId ||
       (!asResource && filterResourceId) ||
-      (manager && filterResourceType)
+      (manager && filterResourceType) ||
+      (manager && filterResourceTeam)
   );
   const resourceTypes = [
     ...new Set(data.resources.map((r) => r.type).filter(Boolean)),
+  ].sort((a, b) => a.localeCompare(b));
+  const resourceTeams = [
+    ...new Set(data.resources.map((r) => r.team).filter(Boolean)),
   ].sort((a, b) => a.localeCompare(b));
 
   return (
@@ -65,6 +76,25 @@ export function FilterSortBar({ showClear = true }: FilterSortBarProps) {
             {data.resources.map((r) => (
               <option key={r.id} value={r.id}>
                 {r.name}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+
+      {manager && (
+        <label className={styles.field}>
+          <span>Team</span>
+          <select
+            value={filterResourceTeam}
+            onChange={(e) =>
+              setData((prev) => setFilterResourceTeam(prev, e.target.value))
+            }
+          >
+            <option value="">All teams</option>
+            {resourceTeams.map((team) => (
+              <option key={team} value={team}>
+                {team}
               </option>
             ))}
           </select>

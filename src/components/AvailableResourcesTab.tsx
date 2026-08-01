@@ -85,6 +85,7 @@ export function AvailableResourcesTab() {
             <tr>
               <th>Name</th>
               <th>Type</th>
+              <th>Team</th>
               <th>Skills</th>
               <th>Active projects</th>
               <th>Status</th>
@@ -143,6 +144,34 @@ export function AvailableResourcesTab() {
                         <HistoryPopover
                           title={history.label}
                           entries={getHistory("resource", row.resource.id, "type")}
+                          onClose={() => setHistory(null)}
+                        />
+                      )}
+                  </div>
+                </td>
+                <td className={styles.cell}>
+                  <div className={styles.cellWrap}>
+                    <EditableCell
+                      value={row.resource.team}
+                      placeholder="Team…"
+                      onCommit={(v) =>
+                        setData((prev) =>
+                          updateResourceField(prev, row.resource.id, "team", v)
+                        )
+                      }
+                      onHistory={() =>
+                        setHistory({
+                          resourceId: row.resource.id,
+                          field: "team",
+                          label: "Team",
+                        })
+                      }
+                    />
+                    {history?.resourceId === row.resource.id &&
+                      history.field === "team" && (
+                        <HistoryPopover
+                          title={history.label}
+                          entries={getHistory("resource", row.resource.id, "team")}
                           onClose={() => setHistory(null)}
                         />
                       )}

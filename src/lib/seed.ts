@@ -35,43 +35,50 @@ function daysBetweenLocal(a: Date, b: Date): number {
 }
 
 const FIRST_NAMES = [
-  "Ava", "Noah", "Mia", "Leo", "Elsa", "Oscar", "Iris", "Elias", "Sofia", "Oliver",
-  "Emma", "Lucas", "Aino", "Väinö", "Helmi", "Eino", "Lilja", "Onni", "Venla", "Eemeli",
-  "Aada", "Toivo", "Seela", "Viljo", "Pihla", "Joel", "Ellen", "Hugo", "Linnea", "Anton",
-  "Saga", "Emil", "Alma", "Niko", "Viola", "Jasper", "Siiri", "Mikael", "Iida", "Samuel",
-  "Hilla", "Daniel", "Lotta", "Rasmus", "Amanda", "Teemu", "Kerttu", "Matias", "Nella", "Aleksi",
+  "Amara", "Hassan", "Mei", "Diego", "Priya", "Jonas", "Fatima", "Kenji", "Sofia", "Omar",
+  "Anika", "Lukas", "Chioma", "Ravi", "Elena", "Thiago", "Nadia", "Wei", "Ingrid", "Jamal",
+  "Yara", "Mateo", "Siti", "Andreas", "Leila", "Carlos", "Hana", "Erik", "Amina", "Noah",
+  "Zara", "Hiro", "Camila", "Tomas", "Aisha", "Felix", "Noor", "Ibrahim", "Lucia", "Soren",
+  "Keiko", "Marcus", "Imani", "Pavel", "Sara", "Kwame", "Ines", "Arjun", "Marta", "Samir",
 ];
 
 const LAST_NAMES = [
-  "Lind", "Berg", "Korhonen", "Saarinen", "Niemi", "Virtanen", "Mäkinen", "Hämäläinen",
-  "Laine", "Heikkinen", "Koskinen", "Järvinen", "Lehtonen", "Rantanen", "Aalto", "Salminen",
-  "Tuominen", "Nurmi", "Hiltunen", "Kallio", "Lahtinen", "Peltola", "Ojala", "Hakala",
-  "Koivisto", "Mattila", "Savolainen", "Lehto", "Ahonen", "Rinne", "Karjalainen", "Nieminen",
-  "Seppälä", "Väisänen", "Miettinen", "Laakso", "Heikkilä", "Kinnunen", "Salonen", "Turunen",
-  "Leppänen", "Pitkänen", "Haapala", "Mustonen", "Jokinen", "Rautiainen", "Peltonen", "Immonen",
-  "Hietala", "Vuorinen",
+  "Okoye", "Al-Rashid", "Chen", "Silva", "Patel", "Bergström", "Diallo", "Nakamura", "Reyes", "Hassan",
+  "Singh", "Kowalski", "Adeyemi", "Menon", "Petrov", "Costa", "Khalil", "Zhou", "Larsen", "Mwangi",
+  "Haddad", "Vargas", "Rahman", "Weber", "Abbas", "Fernandez", "Kim", "Nilsen", "Bakir", "Andersson",
+  "Iqbal", "Tanaka", "Morales", "Novak", "Farouk", "Hoffmann", "Saleh", "Kamau", "Rossi", "Jensen",
+  "Sato", "Okafor", "Ndiaye", "Horvath", "Cohen", "Boateng", "Moreira", "Desai", "Kovacs", "Rahman",
+];
+
+const TEAMS = [
+  "Quay & Civil",
+  "Crane & Mechanical",
+  "Electrical & Controls",
+  "Marine Operations",
+  "Terminal Planning",
+  "HSE & Compliance",
 ];
 
 const TYPES = [
-  "Engineer",
-  "Technician",
-  "Project Manager",
-  "Analyst",
-  "Designer",
-  "Site Lead",
-  "Coordinator",
-  "Specialist",
+  "Civil Engineer",
+  "Crane Technician",
+  "Controls Engineer",
+  "Marine Pilot Support",
+  "Terminal Planner",
+  "HSE Officer",
+  "Site Supervisor",
+  "Project Engineer",
 ];
 
 const TASK_VERBS = [
-  "Review",
-  "Draft",
-  "Survey",
-  "Install",
-  "Coordinate",
-  "Analyze",
   "Inspect",
-  "Update",
+  "Survey",
+  "Commission",
+  "Coordinate",
+  "Review",
+  "Install",
+  "Calibrate",
+  "Draft",
   "Validate",
   "Prepare",
   "Align",
@@ -79,18 +86,18 @@ const TASK_VERBS = [
 ];
 
 const TASK_NOUNS = [
-  "drawings",
-  "load cases",
-  "site notes",
+  "quay wall",
+  "STS crane",
+  "reefer racks",
+  "gate OCR",
+  "berth schedule",
+  "fender line",
+  "yard RTG",
+  "dredge spoil",
+  "safety permit",
   "cable trays",
-  "stakeholder pack",
-  "forecast",
-  "pad survey",
-  "alignment study",
-  "safety checklist",
-  "BOM",
-  "schedule",
-  "interfaces",
+  "TOS interface",
+  "bollard loads",
 ];
 
 function hash(n: number): number {
@@ -249,14 +256,14 @@ export function createSeedData(): AppData {
   const yearEnd = addDays(today, randInt(280, 360));
 
   const projects: Project[] = [
-    { id: "proj_alpha", name: "Harbor Bridge", number: "P-1042" },
-    { id: "proj_beta", name: "North Wind Farm", number: "P-1108" },
-    { id: "proj_gamma", name: "City Metro Line", number: "P-1201" },
-    { id: "proj_delta", name: "Coastal Road Upgrade", number: "P-1305" },
-    { id: "proj_epsilon", name: "Grid Substation B", number: "P-1412" },
-    { id: "proj_zeta", name: "Port Crane Retrofit", number: "P-1520" },
-    { id: "proj_eta", name: "District Heating Loop", number: "P-1603" },
-    { id: "proj_theta", name: "Airport Apron Works", number: "P-1711" },
+    { id: "proj_alpha", name: "Berth 4 Expansion", number: "PT-1042" },
+    { id: "proj_beta", name: "STS Crane Retrofit", number: "PT-1108" },
+    { id: "proj_gamma", name: "Yard Reefer Power", number: "PT-1201" },
+    { id: "proj_delta", name: "Gate Automation", number: "PT-1305" },
+    { id: "proj_epsilon", name: "Approach Channel Dredge", number: "PT-1412" },
+    { id: "proj_zeta", name: "RTG Fleet Upgrade", number: "PT-1520" },
+    { id: "proj_eta", name: "Quay Fender Renewal", number: "PT-1603" },
+    { id: "proj_theta", name: "TOS Integration", number: "PT-1711" },
     { id: TIME_OFF_PROJECT_ID, name: "Time off", number: "P-OFF" },
   ];
 
@@ -265,11 +272,11 @@ export function createSeedData(): AppData {
     .map((p) => p.id);
 
   const skills: Skill[] = [
-    { id: "sk_civil", name: "Civil Design", category: "Engineering" },
-    { id: "sk_elec", name: "Electrical", category: "Engineering" },
-    { id: "sk_pm", name: "Project Planning", category: "Management" },
-    { id: "sk_cad", name: "CAD", category: "Tools" },
-    { id: "sk_safety", name: "Site Safety", category: "Operations" },
+    { id: "sk_civil", name: "Marine Civil", category: "Engineering" },
+    { id: "sk_elec", name: "Terminal Power", category: "Engineering" },
+    { id: "sk_pm", name: "Terminal Planning", category: "Operations" },
+    { id: "sk_cad", name: "CAD / BIM", category: "Tools" },
+    { id: "sk_safety", name: "Port HSE", category: "Compliance" },
   ];
 
   const resources: Resource[] = [];
@@ -278,15 +285,17 @@ export function createSeedData(): AppData {
 
   for (let i = 0; i < 50; i++) {
     const id = i === 0 ? "res_ava" : `res_${String(i).padStart(2, "0")}`;
+    const team = TEAMS[i % TEAMS.length];
     resources.push({
       id,
       name: `${FIRST_NAMES[i]} ${LAST_NAMES[i]}`,
       type: pick(TYPES, i * 17 + 3),
+      team,
       notes:
         i === 0
-          ? "Lead civil contact for Harbor Bridge"
+          ? "Lead civil contact for Berth 4 Expansion"
           : i === 2
-            ? "Prefers morning standups"
+            ? "Shift liaison for night berthing windows"
             : "",
     });
 
@@ -380,7 +389,7 @@ export function createSeedData(): AppData {
       {
         id: `task_${taskCounter++}`,
         assignmentId: harbor.id,
-        title: "Foundation load review",
+        title: "Quay wall load review",
         status: "In progress",
         start: daysFromToday(conflictStart),
         end: daysFromToday(conflictStart + randInt(4, 8)),
@@ -388,7 +397,7 @@ export function createSeedData(): AppData {
       {
         id: `task_${taskCounter++}`,
         assignmentId: harbor.id,
-        title: "Deck span drawings",
+        title: "Berth apron drawings",
         status: "Todo",
         start: daysFromToday(conflictEnd - randInt(2, 5)),
         end: daysFromToday(conflictEnd + randInt(2, 6)),
@@ -405,7 +414,7 @@ export function createSeedData(): AppData {
       tasks.push({
         id: `task_${taskCounter++}`,
         assignmentId: harbor.id,
-        title: `Harbor follow-up (${n + 1})`,
+        title: `Berth follow-up (${n + 1})`,
         status: statusForRange(
           formatDate(cursor),
           formatDate(taskEnd),
@@ -432,7 +441,7 @@ export function createSeedData(): AppData {
     tasks.push({
       id: `task_${taskCounter++}`,
       assignmentId: metro.id,
-      title: "Metro alignment study",
+      title: "Reefer power alignment study",
       status: "In progress",
       start: daysFromToday(metroTaskStart),
       end: daysFromToday(metroTaskEnd),
@@ -448,7 +457,7 @@ export function createSeedData(): AppData {
       tasks.push({
         id: `task_${taskCounter++}`,
         assignmentId: metro.id,
-        title: `Metro coordination (${n + 1})`,
+        title: `Reefer coordination (${n + 1})`,
         status: statusForRange(
           formatDate(cursor),
           formatDate(taskEnd),
@@ -542,6 +551,7 @@ export function createSeedData(): AppData {
       filterProjectId: "",
       filterResourceId: "",
       filterResourceType: "",
+      filterResourceTeam: "",
       sortKey: "resourceName",
       sortDir: "asc",
       ganttScale: "month",
