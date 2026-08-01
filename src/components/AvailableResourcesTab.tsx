@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/context/StoreContext";
 import {
   addResource,
@@ -34,8 +34,16 @@ export function AvailableResourcesTab() {
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const addedRowRef = useRef<HTMLTableRowElement>(null);
   const today = todayIso();
+
+  // Callback ref: fires exactly when the newly added row's DOM node mounts,
+  // so we can reliably scroll it into view regardless of its sorted position.
+  const scrollAddedRowIntoView = useCallback(
+    (node: HTMLTableRowElement | null) => {
+      node?.scrollIntoView({ block: "center", behavior: "smooth" });
+    },
+    []
+  );
 
   useEffect(() => {
     nameInputRef.current?.focus();
@@ -43,7 +51,6 @@ export function AvailableResourcesTab() {
 
   useEffect(() => {
     if (!lastAddedId) return;
-    addedRowRef.current?.scrollIntoView({ block: "center" });
     const timer = window.setTimeout(() => setLastAddedId(null), 2500);
     return () => window.clearTimeout(timer);
   }, [lastAddedId]);
@@ -158,7 +165,11 @@ export function AvailableResourcesTab() {
             {rows.map((row) => (
               <tr
                 key={row.resource.id}
-                ref={row.resource.id === lastAddedId ? addedRowRef : undefined}
+                ref={
+                  row.resource.id === lastAddedId
+                    ? scrollAddedRowIntoView
+                    : undefined
+                }
                 className={
                   row.resource.id === lastAddedId ? styles.added : undefined
                 }

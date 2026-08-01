@@ -203,7 +203,10 @@ tr:hover .deleteBtn {
 
 @keyframes addedFlash {
   0% {
-    background: rgba(47, 111, 94, 0.28);
+    background: rgba(47, 111, 94, 0.35);
+  }
+  35% {
+    background: rgba(47, 111, 94, 0.35);
   }
   100% {
     background: transparent;
