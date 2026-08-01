@@ -31,7 +31,7 @@ import styles from "./ResourcesTab.module.css";
 
 const COLS = [
   { id: "resourceName", label: "Resource", width: 200 },
-  { id: "resourceType", label: "Type", width: 110 },
+  { id: "resourceType", label: "Role", width: 110 },
   { id: "team", label: "Team", width: 140 },
   { id: "skills", label: "Skills", width: 140 },
   { id: "projects", label: "Projects", width: 140 },
@@ -240,8 +240,9 @@ export function ResourcesTab() {
             start: task.start,
             end: task.end,
             label: task.title,
-            color: inConflict ? "var(--danger)" : color,
+            color,
             variant: "task",
+            conflict: inConflict,
           });
         }
       }
@@ -416,7 +417,7 @@ export function ResourcesTab() {
       const field =
         colId === "resourceType" ? "type" : colId === "team" ? "team" : "notes";
       const label =
-        colId === "resourceType" ? "Type" : colId === "team" ? "Team" : "Notes";
+        colId === "resourceType" ? "Role" : colId === "team" ? "Team" : "Notes";
       const managerLocked =
         (colId === "resourceType" || colId === "team") && !manager;
       return (

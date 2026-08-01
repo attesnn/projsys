@@ -55,7 +55,7 @@ export function SkillsTab() {
           <thead>
             <tr>
               <th className={styles.stickyCol}>Resource</th>
-              <th className={styles.typeCol}>Type</th>
+              <th className={styles.typeCol}>Role</th>
               {data.skills.map((skill) => (
                 <th key={skill.id} className={styles.skillHead}>
                   <div className={styles.skillHeadInner}>

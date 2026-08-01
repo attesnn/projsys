@@ -128,8 +128,8 @@ export function AvailableResourcesTab() {
         <input
           className={styles.input}
           value={draft.type}
-          placeholder="Type"
-          aria-label="New resource type"
+          placeholder="Role"
+          aria-label="New resource role"
           onChange={(e) => setDraft((d) => ({ ...d, type: e.target.value }))}
         />
         <input
@@ -153,7 +153,7 @@ export function AvailableResourcesTab() {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Type</th>
+              <th>Role</th>
               <th>Team</th>
               <th>Skills</th>
               <th>Active projects</th>
@@ -214,7 +214,7 @@ export function AvailableResourcesTab() {
                         setHistory({
                           resourceId: row.resource.id,
                           field: "type",
-                          label: "Type",
+                          label: "Role",
                         })
                       }
                     />

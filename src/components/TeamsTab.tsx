@@ -20,7 +20,7 @@ import styles from "./TeamsTab.module.css";
 
 const COLS = [
   { id: "name", label: "Team / Resource", width: 220 },
-  { id: "type", label: "Type", width: 130 },
+  { id: "type", label: "Role", width: 130 },
   { id: "people", label: "People", width: 64 },
   { id: "tasks", label: "Tasks", width: 64 },
   { id: "active", label: "Active", width: 64 },

@@ -103,14 +103,14 @@ export function FilterSortBar({ showClear = true }: FilterSortBarProps) {
 
       {manager && (
         <label className={styles.field}>
-          <span>Type</span>
+          <span>Role</span>
           <select
             value={filterResourceType}
             onChange={(e) =>
               setData((prev) => setFilterResourceType(prev, e.target.value))
             }
           >
-            <option value="">All types</option>
+            <option value="">All roles</option>
             {resourceTypes.map((type) => (
               <option key={type} value={type}>
                 {type}
