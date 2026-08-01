@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/context/StoreContext";
 import {
   addResource,
   deleteResource,
   updateResourceField,
 } from "@/lib/store";
+import { createId } from "@/lib/id";
 import { filteredSortedResources } from "@/lib/query";
 import { EditableCell } from "./EditableCell";
 import { FilterSortBar } from "./FilterSortBar";
@@ -19,6 +20,8 @@ interface HistoryTarget {
   label: string;
 }
 
+const EMPTY_DRAFT = { name: "", type: "", team: "" };
+
 function todayIso(): string {
   const d = new Date();
   d.setHours(12, 0, 0, 0);
@@ -28,7 +31,32 @@ function todayIso(): string {
 export function AvailableResourcesTab() {
   const { data, setData, getHistory } = useStore();
   const [history, setHistory] = useState<HistoryTarget | null>(null);
+  const [draft, setDraft] = useState(EMPTY_DRAFT);
+  const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const today = todayIso();
+
+  useEffect(() => {
+    nameInputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (!lastAddedId) return;
+    const timer = window.setTimeout(() => setLastAddedId(null), 2500);
+    return () => window.clearTimeout(timer);
+  }, [lastAddedId]);
+
+  const handleAddResource = () => {
+    if (!draft.name.trim()) {
+      nameInputRef.current?.focus();
+      return;
+    }
+    const id = createId("res");
+    setData((prev) => addResource(prev, { ...draft, id }));
+    setLastAddedId(id);
+    setDraft(EMPTY_DRAFT);
+    nameInputRef.current?.focus();
+  };
 
   const rows = useMemo(() => {
     return filteredSortedResources(data).map((resource) => {
@@ -66,18 +94,50 @@ export function AvailableResourcesTab() {
   return (
     <div className={styles.root}>
       <div className={styles.toolbar}>
-        <button
-          type="button"
-          className={styles.btn}
-          onClick={() => setData((prev) => addResource(prev))}
-        >
-          Add resource
-        </button>
         <FilterSortBar />
         <span className={styles.hint}>
           Availability is based on allocations covering today
         </span>
       </div>
+
+      <form
+        className={styles.addPanel}
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleAddResource();
+        }}
+      >
+        <span className={styles.addLabel}>New resource</span>
+        <input
+          ref={nameInputRef}
+          className={`${styles.input} ${styles.nameInput}`}
+          value={draft.name}
+          placeholder="Name"
+          aria-label="New resource name"
+          onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
+        />
+        <input
+          className={styles.input}
+          value={draft.type}
+          placeholder="Type"
+          aria-label="New resource type"
+          onChange={(e) => setDraft((d) => ({ ...d, type: e.target.value }))}
+        />
+        <input
+          className={styles.input}
+          value={draft.team}
+          placeholder="Team"
+          aria-label="New resource team"
+          onChange={(e) => setDraft((d) => ({ ...d, team: e.target.value }))}
+        />
+        <button
+          type="submit"
+          className={styles.btn}
+          disabled={!draft.name.trim()}
+        >
+          Add resource
+        </button>
+      </form>
 
       <div className={styles.tableWrap}>
         <table className={styles.table}>
@@ -94,7 +154,12 @@ export function AvailableResourcesTab() {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.resource.id}>
+              <tr
+                key={row.resource.id}
+                className={
+                  row.resource.id === lastAddedId ? styles.added : undefined
+                }
+              >
                 <td className={styles.cell}>
                   <div className={styles.cellWrap}>
                     <EditableCell

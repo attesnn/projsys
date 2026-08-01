@@ -533,15 +533,25 @@ export function setActingAsResourceId(
   };
 }
 
-export function addResource(data: AppData): AppData {
+export function addResource(
+  data: AppData,
+  fields?: { id?: string; name?: string; type?: string; team?: string }
+): AppData {
   const resource: Resource = {
-    id: createId("res"),
-    name: "New resource",
-    type: "Unassigned",
-    team: "",
+    id: fields?.id ?? createId("res"),
+    name: fields?.name?.trim() || "New resource",
+    type: fields?.type?.trim() || "Unassigned",
+    team: fields?.team?.trim() ?? "",
     notes: "",
   };
-  let next = appendLog(data, "resource", resource.id, "_created", "", resource.name);
+  const next = appendLog(
+    data,
+    "resource",
+    resource.id,
+    "_created",
+    "",
+    resource.name
+  );
   return { ...next, resources: [...next.resources, resource] };
 }
 
