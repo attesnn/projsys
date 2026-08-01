@@ -258,12 +258,36 @@
 
 .hScrollBar {
   flex-shrink: 0;
-  height: 14px;
-  overflow-x: auto;
+  height: 18px;
+  overflow-x: scroll;
   overflow-y: hidden;
   border-top: 1px solid var(--border);
   background: var(--surface);
   box-sizing: border-box;
+  /* Always show a scrollbar gutter (Firefox + modern Chromium). */
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: #8a939c var(--border);
+}
+
+.hScrollBar::-webkit-scrollbar {
+  height: 18px;
+  background: var(--border);
+}
+
+.hScrollBar::-webkit-scrollbar-track {
+  background: var(--border);
+}
+
+.hScrollBar::-webkit-scrollbar-thumb {
+  background: #8a939c;
+  border: 2px solid var(--border);
+  border-radius: 2px;
+  min-width: 40px;
+}
+
+.hScrollBar::-webkit-scrollbar-thumb:hover {
+  background: #6d767f;
 }
 
 .hScrollInner {
