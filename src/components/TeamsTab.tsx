@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useStore } from "@/context/StoreContext";
 import {
   analyzeResourceAllocation,
@@ -18,6 +18,19 @@ import {
 } from "./GanttView";
 import styles from "./TeamsTab.module.css";
 
+const COLS = [
+  { id: "name", label: "Team / Resource", width: 220 },
+  { id: "type", label: "Type", width: 130 },
+  { id: "people", label: "People", width: 64 },
+  { id: "tasks", label: "Tasks", width: 64 },
+  { id: "active", label: "Active", width: 64 },
+  { id: "todo", label: "Todo", width: 56 },
+  { id: "inProgress", label: "In prog", width: 64 },
+  { id: "done", label: "Done", width: 56 },
+  { id: "alloc", label: "Alloc %", width: 64 },
+  { id: "busy", label: "Busy %", width: 64 },
+] as const;
+
 function defaultWindow() {
   const now = new Date();
   now.setHours(12, 0, 0, 0);
@@ -31,6 +44,7 @@ export function TeamsTab() {
   /** Empty = all teams collapsed (team-level Gantt first). */
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const [ganttWindow, setGanttWindow] = useState(defaultWindow);
+  const headerScrollRef = useRef<HTMLDivElement>(null);
   const bodyScrollRef = useRef<HTMLDivElement>(null);
   const ganttBodyRef = useRef<HTMLDivElement>(null);
 
@@ -111,6 +125,9 @@ export function TeamsTab() {
           people: memberRows.length,
           taskCount,
           activeTasks,
+          todo: memberRows.reduce((s, m) => s + m.todo, 0),
+          inProgress: memberRows.reduce((s, m) => s + m.inProgress, 0),
+          done: memberRows.reduce((s, m) => s + m.done, 0),
           avgAllocPct: allocSum / n,
           avgBusyPct: busySum / n,
         };
@@ -223,123 +240,253 @@ export function TeamsTab() {
 
   return (
     <div className={styles.root}>
-      <div className={styles.toolbar}>
-        <FilterSortBar />
-        <span className={styles.hint}>
-          Team Gantt shows rolled-up bookings; Alloc/Busy % follow the visible
-          window
-        </span>
-      </div>
-
       <div className={styles.split}>
         <div className={styles.gridPane}>
-          <div className={styles.tableHeader}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th className={styles.teamCol}>Team / Resource</th>
-                  <th>Type</th>
-                  <th className={styles.num}>People</th>
-                  <th className={styles.num}>Tasks</th>
-                  <th className={styles.num}>Active</th>
-                  <th className={styles.num}>Todo</th>
-                  <th className={styles.num}>In progress</th>
-                  <th className={styles.num}>Done</th>
-                  <th className={styles.num}>Alloc %</th>
-                  <th className={styles.num}>Busy %</th>
-                </tr>
-              </thead>
-            </table>
+          <div className={styles.toolbar}>
+            <FilterSortBar />
+            <span className={styles.hint}>
+              Gantt shows team bookings; metrics follow the visible window
+            </span>
           </div>
+
+          <div className={styles.gridHeader} ref={headerScrollRef}>
+            {COLS.map((col) => (
+              <div
+                key={col.id}
+                className={`${styles.th} ${col.id !== "name" && col.id !== "type" ? styles.num : ""}`}
+                style={{ width: col.width, minWidth: col.width }}
+              >
+                {col.label}
+              </div>
+            ))}
+          </div>
+
           <div
-            className={styles.tableBody}
+            className={styles.gridBody}
             ref={bodyScrollRef}
-            onScroll={() => syncVertical("grid")}
+            onScroll={() => {
+              if (headerScrollRef.current && bodyScrollRef.current) {
+                headerScrollRef.current.scrollLeft =
+                  bodyScrollRef.current.scrollLeft;
+              }
+              syncVertical("grid");
+            }}
           >
-            <table className={styles.table}>
-              <tbody>
-                {teams.map((group) => {
-                  const open = expanded.has(group.team);
-                  return (
-                    <Fragment key={`team_${group.team}`}>
-                      <tr className={styles.teamRow}>
-                        <td className={styles.teamCol}>
-                          <button
-                            type="button"
-                            className={styles.toggle}
-                            onClick={() => toggle(group.team)}
-                            aria-expanded={open}
+            {teams.length === 0 ? (
+              <div className={styles.empty}>
+                No resources match the current filters.
+              </div>
+            ) : (
+              teams.map((group) => {
+                const open = expanded.has(group.team);
+                return (
+                  <div key={`team_${group.team}`} className={styles.block}>
+                    <div className={`${styles.tr} ${styles.teamRow}`}>
+                      <div
+                        className={styles.td}
+                        style={{
+                          width: COLS[0].width,
+                          minWidth: COLS[0].width,
+                        }}
+                      >
+                        <button
+                          type="button"
+                          className={styles.toggle}
+                          onClick={() => toggle(group.team)}
+                          aria-expanded={open}
+                        >
+                          {open ? "▼" : "▶"}
+                        </button>
+                        <span className={styles.teamName}>{group.team}</span>
+                      </div>
+                      <div
+                        className={`${styles.td} ${styles.muted}`}
+                        style={{
+                          width: COLS[1].width,
+                          minWidth: COLS[1].width,
+                        }}
+                      >
+                        —
+                      </div>
+                      <div
+                        className={`${styles.td} ${styles.num}`}
+                        style={{
+                          width: COLS[2].width,
+                          minWidth: COLS[2].width,
+                        }}
+                      >
+                        {group.people}
+                      </div>
+                      <div
+                        className={`${styles.td} ${styles.num}`}
+                        style={{
+                          width: COLS[3].width,
+                          minWidth: COLS[3].width,
+                        }}
+                      >
+                        {group.taskCount}
+                      </div>
+                      <div
+                        className={`${styles.td} ${styles.num} ${group.activeTasks > 0 ? styles.emphasis : ""}`}
+                        style={{
+                          width: COLS[4].width,
+                          minWidth: COLS[4].width,
+                        }}
+                      >
+                        {group.activeTasks}
+                      </div>
+                      <div
+                        className={`${styles.td} ${styles.num}`}
+                        style={{
+                          width: COLS[5].width,
+                          minWidth: COLS[5].width,
+                        }}
+                      >
+                        {group.todo}
+                      </div>
+                      <div
+                        className={`${styles.td} ${styles.num}`}
+                        style={{
+                          width: COLS[6].width,
+                          minWidth: COLS[6].width,
+                        }}
+                      >
+                        {group.inProgress}
+                      </div>
+                      <div
+                        className={`${styles.td} ${styles.num}`}
+                        style={{
+                          width: COLS[7].width,
+                          minWidth: COLS[7].width,
+                        }}
+                      >
+                        {group.done}
+                      </div>
+                      <div
+                        className={`${styles.td} ${styles.num}`}
+                        style={{
+                          width: COLS[8].width,
+                          minWidth: COLS[8].width,
+                        }}
+                      >
+                        {formatAllocPct(group.avgAllocPct)}
+                      </div>
+                      <div
+                        className={`${styles.td} ${styles.num} ${group.avgBusyPct > 0 ? styles.busy : ""}`}
+                        style={{
+                          width: COLS[9].width,
+                          minWidth: COLS[9].width,
+                        }}
+                      >
+                        {formatAllocPct(group.avgBusyPct)}
+                      </div>
+                    </div>
+
+                    {open &&
+                      group.members.map((m) => (
+                        <div
+                          key={m.resource.id}
+                          className={`${styles.tr} ${styles.memberRow}`}
+                        >
+                          <div
+                            className={styles.td}
+                            style={{
+                              width: COLS[0].width,
+                              minWidth: COLS[0].width,
+                            }}
                           >
-                            {open ? "▼" : "▶"}
-                          </button>
-                          <span className={styles.teamName}>{group.team}</span>
-                        </td>
-                        <td className={styles.muted}>—</td>
-                        <td className={styles.num}>{group.people}</td>
-                        <td className={styles.num}>{group.taskCount}</td>
-                        <td
-                          className={`${styles.num} ${group.activeTasks > 0 ? styles.emphasis : ""}`}
-                        >
-                          {group.activeTasks}
-                        </td>
-                        <td className={styles.num}>
-                          {group.members.reduce((s, m) => s + m.todo, 0)}
-                        </td>
-                        <td className={styles.num}>
-                          {group.members.reduce((s, m) => s + m.inProgress, 0)}
-                        </td>
-                        <td className={styles.num}>
-                          {group.members.reduce((s, m) => s + m.done, 0)}
-                        </td>
-                        <td className={styles.num}>
-                          {formatAllocPct(group.avgAllocPct)}
-                        </td>
-                        <td
-                          className={`${styles.num} ${group.avgBusyPct > 0 ? styles.busy : ""}`}
-                        >
-                          {formatAllocPct(group.avgBusyPct)}
-                        </td>
-                      </tr>
-                      {open &&
-                        group.members.map((m) => (
-                          <tr key={m.resource.id} className={styles.memberRow}>
-                            <td className={styles.teamCol}>
-                              <span className={styles.toggleSpacer} />
-                              <span>{m.resource.name}</span>
-                            </td>
-                            <td className={styles.muted}>{m.resource.type}</td>
-                            <td className={styles.num}>—</td>
-                            <td className={styles.num}>{m.taskCount}</td>
-                            <td
-                              className={`${styles.num} ${m.activeTasks > 0 ? styles.emphasis : ""}`}
-                            >
-                              {m.activeTasks}
-                            </td>
-                            <td className={styles.num}>{m.todo}</td>
-                            <td className={styles.num}>{m.inProgress}</td>
-                            <td className={styles.num}>{m.done}</td>
-                            <td className={styles.num}>
-                              {formatAllocPct(m.allocation.allocPct)}
-                            </td>
-                            <td
-                              className={`${styles.num} ${m.allocation.overloadPct > 0 ? styles.busy : ""}`}
-                            >
-                              {formatAllocPct(m.allocation.overloadPct)}
-                            </td>
-                          </tr>
-                        ))}
-                    </Fragment>
-                  );
-                })}
-                {teams.length === 0 && (
-                  <tr>
-                    <td colSpan={10} className={styles.empty}>
-                      No resources match the current filters.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                            <span className={styles.toggleSpacer} />
+                            <span className={styles.memberName}>
+                              {m.resource.name}
+                            </span>
+                          </div>
+                          <div
+                            className={`${styles.td} ${styles.muted}`}
+                            style={{
+                              width: COLS[1].width,
+                              minWidth: COLS[1].width,
+                            }}
+                          >
+                            {m.resource.type}
+                          </div>
+                          <div
+                            className={`${styles.td} ${styles.num} ${styles.muted}`}
+                            style={{
+                              width: COLS[2].width,
+                              minWidth: COLS[2].width,
+                            }}
+                          >
+                            —
+                          </div>
+                          <div
+                            className={`${styles.td} ${styles.num}`}
+                            style={{
+                              width: COLS[3].width,
+                              minWidth: COLS[3].width,
+                            }}
+                          >
+                            {m.taskCount}
+                          </div>
+                          <div
+                            className={`${styles.td} ${styles.num} ${m.activeTasks > 0 ? styles.emphasis : ""}`}
+                            style={{
+                              width: COLS[4].width,
+                              minWidth: COLS[4].width,
+                            }}
+                          >
+                            {m.activeTasks}
+                          </div>
+                          <div
+                            className={`${styles.td} ${styles.num}`}
+                            style={{
+                              width: COLS[5].width,
+                              minWidth: COLS[5].width,
+                            }}
+                          >
+                            {m.todo}
+                          </div>
+                          <div
+                            className={`${styles.td} ${styles.num}`}
+                            style={{
+                              width: COLS[6].width,
+                              minWidth: COLS[6].width,
+                            }}
+                          >
+                            {m.inProgress}
+                          </div>
+                          <div
+                            className={`${styles.td} ${styles.num}`}
+                            style={{
+                              width: COLS[7].width,
+                              minWidth: COLS[7].width,
+                            }}
+                          >
+                            {m.done}
+                          </div>
+                          <div
+                            className={`${styles.td} ${styles.num}`}
+                            style={{
+                              width: COLS[8].width,
+                              minWidth: COLS[8].width,
+                            }}
+                          >
+                            {formatAllocPct(m.allocation.allocPct)}
+                          </div>
+                          <div
+                            className={`${styles.td} ${styles.num} ${m.allocation.overloadPct > 0 ? styles.busy : ""}`}
+                            style={{
+                              width: COLS[9].width,
+                              minWidth: COLS[9].width,
+                            }}
+                          >
+                            {formatAllocPct(m.allocation.overloadPct)}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 

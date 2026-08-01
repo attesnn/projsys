@@ -5,25 +5,6 @@
   min-height: 0;
 }
 
-.toolbar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  min-height: var(--toolbar-height);
-  height: auto;
-  padding: 0.4rem 0.85rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-  box-sizing: border-box;
-}
-
-.hint {
-  font-size: 0.72rem;
-  color: var(--muted);
-  margin-left: auto;
-}
-
 .split {
   display: grid;
   grid-template-columns: minmax(0, 0.48fr) minmax(0, 0.52fr);
@@ -41,73 +22,123 @@
   background: var(--surface);
 }
 
-.tableHeader {
-  flex-shrink: 0;
-  overflow: hidden;
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  height: var(--toolbar-height);
+  min-height: var(--toolbar-height);
+  max-height: var(--toolbar-height);
+  padding: 0 0.75rem;
   border-bottom: 1px solid var(--border);
-  background: var(--header-bg, var(--surface));
+  background: var(--surface);
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.tableBody {
+.hint {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-left: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40%;
+}
+
+.gridHeader {
+  display: flex;
+  overflow: hidden;
+  height: var(--header-height);
+  min-height: var(--header-height);
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.th {
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  padding: 0 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-right: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.gridBody {
   flex: 1;
   overflow: auto;
   min-height: 0;
 }
 
-.table {
-  border-collapse: separate;
-  border-spacing: 0;
-  width: max-content;
-  min-width: 100%;
+.block {
+  /* rows are fixed height for Gantt sync */
 }
 
-.table th,
-.table td {
-  border-bottom: 1px solid var(--border-subtle);
-  border-right: 1px solid var(--border-subtle);
-  font-size: 0.8rem;
-  text-align: left;
-  padding: 0 0.65rem;
+.tr {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
   height: var(--row-height);
-  white-space: nowrap;
+  min-height: var(--row-height);
+  max-height: var(--row-height);
+  border-bottom: 1px solid var(--border-subtle);
   box-sizing: border-box;
 }
 
-.table th {
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--muted);
-  background: var(--header-bg, var(--surface));
-}
-
-.teamCol {
-  min-width: 220px;
-}
-
-.num {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  min-width: 64px;
+.tr:hover {
+  background: var(--row-hover);
 }
 
 .teamRow {
   background: rgba(47, 111, 94, 0.06);
 }
 
-.teamRow td {
-  font-weight: 600;
-  color: var(--ink);
+.teamRow:hover {
+  background: rgba(47, 111, 94, 0.1);
 }
 
-.memberRow td {
-  color: var(--ink-soft);
+.memberRow {
+  background: var(--surface);
+}
+
+.td {
+  display: flex;
+  align-items: center;
+  height: var(--row-height);
+  padding: 0 0.45rem;
+  font-size: 0.8rem;
+  border-right: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.num {
+  justify-content: flex-end;
+  font-variant-numeric: tabular-nums;
 }
 
 .teamName {
   font-weight: 650;
   color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memberName {
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .toggle {
@@ -117,6 +148,7 @@
   font: inherit;
   font-size: 0.7rem;
   width: 1.4rem;
+  flex-shrink: 0;
   padding: 0;
   margin-right: 0.35rem;
   cursor: pointer;
@@ -129,6 +161,7 @@
 .toggleSpacer {
   display: inline-block;
   width: 1.4rem;
+  flex-shrink: 0;
   margin-right: 0.35rem;
 }
 
@@ -147,9 +180,9 @@
 }
 
 .empty {
-  padding: 2rem 1rem !important;
+  padding: 2rem 1rem;
   color: var(--muted);
-  text-align: center;
+  font-size: 0.85rem;
 }
 
 @media (max-width: 900px) {
@@ -161,5 +194,9 @@
     border-right: none;
     border-bottom: 1px solid var(--border);
     max-height: 45vh;
+  }
+
+  .hint {
+    display: none;
   }
 }
