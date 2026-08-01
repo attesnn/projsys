@@ -211,20 +211,30 @@ export function ProjectsTab() {
                 Add project
               </button>
             )}
-            <button type="button" className={styles.ghost} onClick={expandAll}>
-              Expand all
-            </button>
-            <button
-              type="button"
-              className={styles.ghost}
-              onClick={collapseOneLevel}
-              title="Collapse the deepest expanded level"
-            >
-              Collapse one level
-            </button>
-            <button type="button" className={styles.ghost} onClick={collapseAll}>
-              Collapse all
-            </button>
+            <div className={styles.treeActions}>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={expandAll}
+              >
+                Expand all
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseOneLevel}
+                title="Collapse the deepest expanded level"
+              >
+                Collapse one level
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseAll}
+              >
+                Collapse all
+              </button>
+            </div>
           </div>
 
           <div className={styles.treeHeader}>Hierarchy</div>

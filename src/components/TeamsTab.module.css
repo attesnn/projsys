@@ -22,15 +22,24 @@
   background: var(--surface);
 }
 
+.topBar {
+  display: flex;
+  align-items: center;
+  min-height: var(--toolbar-height);
+  padding: 0.4rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
 .toolbar {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
   height: var(--toolbar-height);
   min-height: var(--toolbar-height);
-  max-height: var(--toolbar-height);
-  padding: 0 0.75rem;
+  padding: 0 0.85rem;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   box-sizing: border-box;
@@ -40,9 +49,9 @@
 .treeActions {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 0.35rem;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 .ghost {

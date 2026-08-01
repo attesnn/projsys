@@ -499,10 +499,12 @@ export function ResourcesTab() {
 
   return (
     <div className={styles.root}>
+      <div className={styles.topBar}>
+        <FilterSortBar />
+      </div>
       <div className={styles.split}>
         <div className={styles.gridPane}>
           <div className={styles.toolbar}>
-            <FilterSortBar />
             <div className={styles.treeActions}>
               <button
                 type="button"
