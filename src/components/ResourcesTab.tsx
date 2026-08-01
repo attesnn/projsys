@@ -173,6 +173,15 @@ export function ResourcesTab() {
     const out: GanttRow[] = [];
 
     for (const row of rows) {
+      // Assignments (stints) that hold a conflicting task — underline these on
+      // the top-level resource row so conflicts read at a glance, unexpanded.
+      const conflictAssignmentIds = new Set<string>();
+      for (const { assignment, tasks } of row.assignmentRows) {
+        if (tasks.some((t) => row.conflictTaskIds.has(t.id))) {
+          conflictAssignmentIds.add(assignment.id);
+        }
+      }
+
       const assignmentBars: GanttBar[] = row.assignments.map((a) => {
         const project = data.projects.find((p) => p.id === a.projectId);
         const projectIndex = data.projects.findIndex(
@@ -185,6 +194,7 @@ export function ResourcesTab() {
           label: project?.name ?? "Project",
           color: projectBarColor(a.projectId, projectIndex),
           kind: "assignment",
+          conflict: conflictAssignmentIds.has(a.id),
         };
       });
 
