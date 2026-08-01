@@ -238,15 +238,49 @@ export function TeamsTab() {
     });
   }
 
+  function expandAll() {
+    setExpanded(new Set(teams.map((t) => t.team)));
+  }
+
+  function collapseAll() {
+    setExpanded(new Set());
+  }
+
+  /** Teams only have one expandable level (team → people). */
+  function collapseOneLevel() {
+    setExpanded(new Set());
+  }
+
   return (
     <div className={styles.root}>
       <div className={styles.split}>
         <div className={styles.gridPane}>
           <div className={styles.toolbar}>
             <FilterSortBar />
-            <span className={styles.hint}>
-              Gantt shows team bookings; metrics follow the visible window
-            </span>
+            <div className={styles.treeActions}>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={expandAll}
+              >
+                Expand all
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseOneLevel}
+                title="Collapse the deepest expanded level"
+              >
+                Collapse one level
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseAll}
+              >
+                Collapse all
+              </button>
+            </div>
           </div>
 
           <div className={styles.gridHeader} ref={headerScrollRef}>

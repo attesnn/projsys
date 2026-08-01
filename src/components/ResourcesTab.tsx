@@ -282,6 +282,40 @@ export function ResourcesTab() {
     });
   }
 
+  function expandAll() {
+    setExpandedResources(new Set(rows.map((r) => r.resource.id)));
+    setCollapsedAssignments(new Set());
+  }
+
+  function collapseAll() {
+    setExpandedResources(new Set());
+    setCollapsedAssignments(
+      new Set(data.assignments.map((a) => a.id))
+    );
+  }
+
+  /** Collapse deepest open level first (tasks under stints, then resources). */
+  function collapseOneLevel() {
+    const openAssignmentIds: string[] = [];
+    for (const row of rows) {
+      if (!expandedResources.has(row.resource.id)) continue;
+      for (const { assignment } of row.assignmentRows) {
+        if (!collapsedAssignments.has(assignment.id)) {
+          openAssignmentIds.push(assignment.id);
+        }
+      }
+    }
+    if (openAssignmentIds.length > 0) {
+      setCollapsedAssignments((prev) => {
+        const next = new Set(prev);
+        for (const id of openAssignmentIds) next.add(id);
+        return next;
+      });
+      return;
+    }
+    setExpandedResources(new Set());
+  }
+
   function cellValue(row: (typeof rows)[number], colId: ColId): string {
     switch (colId) {
       case "resourceName":
@@ -469,6 +503,30 @@ export function ResourcesTab() {
         <div className={styles.gridPane}>
           <div className={styles.toolbar}>
             <FilterSortBar />
+            <div className={styles.treeActions}>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={expandAll}
+              >
+                Expand all
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseOneLevel}
+                title="Collapse the deepest expanded level"
+              >
+                Collapse one level
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseAll}
+              >
+                Collapse all
+              </button>
+            </div>
           </div>
 
           <div className={styles.gridHeader} ref={headerScrollRef}>

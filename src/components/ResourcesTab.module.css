@@ -18,6 +18,28 @@
   box-sizing: border-box;
 }
 
+.treeActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.ghost {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 0.22rem 0.5rem;
+  cursor: pointer;
+}
+
+.ghost:hover {
+  background: var(--row-hover);
+}
+
 .split {
   display: grid;
   grid-template-columns: minmax(0, 0.48fr) minmax(0, 0.52fr);

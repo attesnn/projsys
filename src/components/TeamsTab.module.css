@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.5rem;
   height: var(--toolbar-height);
   min-height: var(--toolbar-height);
   max-height: var(--toolbar-height);
@@ -37,14 +37,27 @@
   overflow: hidden;
 }
 
-.hint {
-  font-size: 0.68rem;
-  color: var(--muted);
+.treeActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
   margin-left: auto;
+}
+
+.ghost {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 0.22rem 0.5rem;
+  cursor: pointer;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 40%;
+}
+
+.ghost:hover {
+  background: var(--row-hover);
 }
 
 .gridHeader {
@@ -195,7 +208,4 @@
     max-height: 45vh;
   }
 
-  .hint {
-    display: none;
-  }
 }
