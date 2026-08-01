@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: projsys-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: projsys
+      POSTGRES_PASSWORD: projsys
+      POSTGRES_DB: projsys
+    volumes:
+      - projsys_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U projsys -d projsys"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  projsys_pgdata:
