@@ -2,11 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useStore } from "@/context/StoreContext";
-import {
-  analyzeResourceAllocation,
-  formatAllocPct,
-  overloadSpansInWindow,
-} from "@/lib/allocation";
+import { analyzeResourceAllocation, formatAllocPct } from "@/lib/allocation";
 import {
   addAssignmentForResource,
   addTaskToAssignment,
@@ -198,24 +194,11 @@ export function ResourcesTab() {
         };
       });
 
-      const overloadBars: GanttBar[] = overloadSpansInWindow(
-        row.assignments,
-        ganttWindow.start,
-        ganttWindow.end
-      ).map((span, i) => ({
-        id: `overload_${row.resource.id}_${i}`,
-        start: span.start,
-        end: span.end,
-        label: "Heavy",
-        sublabel: "double-booked",
-        kind: "overload",
-      }));
-
       out.push({
         id: row.resource.id,
         label: row.resource.name,
         sublabel: formatAllocPct(row.allocation.allocPct),
-        bars: [...assignmentBars, ...overloadBars],
+        bars: assignmentBars,
       });
 
       if (!expandedResources.has(row.resource.id)) continue;
@@ -259,13 +242,7 @@ export function ResourcesTab() {
     }
 
     return out;
-  }, [
-    rows,
-    data.projects,
-    expandedResources,
-    collapsedAssignments,
-    ganttWindow,
-  ]);
+  }, [rows, data.projects, expandedResources, collapsedAssignments]);
 
   function syncVertical(source: "grid" | "gantt") {
     const grid = bodyScrollRef.current;
