@@ -173,8 +173,8 @@ In **resource** role, queries force the acting person as the resource filter (ma
 ### Teams (`TeamsTab.tsx`)
 
 - Manager-only tab. Resources grouped by `Resource.team` (empty → “Unassigned”).
-- Team row rollups: people, total tasks, active tasks (Todo + In progress), status breakdown, average Alloc % / Busy % for the current calendar month.
-- Expand team → per-resource workload from tasks on that person’s assignments (same shared filters as other tabs).
+- Left: team row rollups (people, tasks, active/todo/in progress/done, avg Alloc/Busy %). Expand → per-resource workload from assigned tasks.
+- Right: Gantt of team allocation — team row shows all member booking bars (project-colored) plus Heavy overlays when the team has concurrent work load; expand syncs member rows. Alloc/Busy % follow the visible Gantt window.
 
 ### Skills (`SkillsTab.tsx`)
 

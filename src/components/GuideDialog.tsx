@@ -72,9 +72,9 @@ export function GuideDialog({ onClose }: GuideDialogProps) {
                 vs Booked for today.
               </li>
               <li>
-                <strong>Teams</strong> — people grouped by team with workload
-                from assigned tasks (active/todo/in progress/done) plus average
-                Alloc % / Busy % for the current month.
+                <strong>Teams</strong> — people grouped by team with task
+                workload, plus a Gantt of rolled-up team bookings (expand for
+                per-person bars). Alloc/Busy % follow the visible Gantt window.
               </li>
               <li>
                 <strong>Skills</strong> — resource × skill matrix (levels 1–5).
