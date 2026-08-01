@@ -34,6 +34,7 @@ export function AvailableResourcesTab() {
   const [draft, setDraft] = useState(EMPTY_DRAFT);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const addedRowRef = useRef<HTMLTableRowElement>(null);
   const today = todayIso();
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export function AvailableResourcesTab() {
 
   useEffect(() => {
     if (!lastAddedId) return;
+    addedRowRef.current?.scrollIntoView({ block: "center" });
     const timer = window.setTimeout(() => setLastAddedId(null), 2500);
     return () => window.clearTimeout(timer);
   }, [lastAddedId]);
@@ -156,6 +158,7 @@ export function AvailableResourcesTab() {
             {rows.map((row) => (
               <tr
                 key={row.resource.id}
+                ref={row.resource.id === lastAddedId ? addedRowRef : undefined}
                 className={
                   row.resource.id === lastAddedId ? styles.added : undefined
                 }
