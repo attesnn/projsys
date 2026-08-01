@@ -1,0 +1,203 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: var(--toolbar-height);
+  padding: 0 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
+.addForm {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.input {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.55rem;
+  min-width: 180px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: var(--ink);
+  color: var(--surface);
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--ink-soft);
+}
+
+.hint {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.tableWrap {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  background: var(--surface);
+}
+
+.table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: max-content;
+  min-width: 100%;
+}
+
+.table th,
+.table td {
+  border-bottom: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+  font-size: 0.8rem;
+  text-align: left;
+  padding: 0;
+  height: var(--row-height);
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--header-bg);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.45rem 0.55rem;
+  height: auto;
+  vertical-align: bottom;
+}
+
+.stickyCol {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--surface);
+  min-width: 150px;
+  padding: 0 0.65rem !important;
+  font-weight: 550;
+  box-shadow: 2px 0 4px rgba(28, 35, 43, 0.04);
+}
+
+thead .stickyCol {
+  z-index: 4;
+  background: var(--header-bg);
+}
+
+.typeCol {
+  min-width: 120px;
+  padding: 0 0.65rem !important;
+  color: var(--muted);
+}
+
+.skillHead {
+  min-width: 110px;
+}
+
+.skillHeadInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem;
+  color: var(--ink);
+  text-transform: none;
+  font-size: 0.78rem;
+  letter-spacing: 0;
+}
+
+.category {
+  margin-top: 0.15rem;
+  font-size: 0.62rem;
+  font-weight: 450;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.removeSkill {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0;
+}
+
+.skillHead:hover .removeSkill {
+  opacity: 1;
+}
+
+.removeSkill:hover {
+  color: var(--danger);
+}
+
+.levelCell {
+  position: relative;
+}
+
+.cellInner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  height: var(--row-height);
+  padding: 0 0.35rem;
+}
+
+.select {
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--ink);
+  cursor: pointer;
+  text-align: center;
+  min-width: 3rem;
+}
+
+.select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.historyBtn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.7rem;
+  opacity: 0;
+}
+
+.cellInner:hover .historyBtn {
+  opacity: 1;
+}
+
+.empty {
+  padding: 2rem 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}

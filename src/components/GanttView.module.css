@@ -1,0 +1,311 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--canvas);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--toolbar-height);
+  padding: 0 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
+.label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.scale {
+  display: flex;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.scaleBtn {
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.68rem;
+  padding: 0.2rem 0.45rem;
+  cursor: pointer;
+}
+
+.scaleBtn:last-child {
+  border-right: none;
+}
+
+.scaleBtn:hover {
+  background: var(--row-hover);
+  color: var(--ink);
+}
+
+.scaleBtnActive {
+  background: var(--accent);
+  color: #fff;
+}
+
+.scaleBtnActive:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.navBtn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+}
+
+.navBtn:hover {
+  background: var(--row-hover);
+}
+
+.headerScroll {
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
+  overflow: hidden;
+}
+
+.weekRow {
+  display: flex;
+  height: var(--header-height);
+}
+
+.week {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.68rem;
+  color: var(--muted);
+  border-right: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+}
+
+.weekendCol {
+  background: var(--weekend);
+}
+
+.weekendBand {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(100% / 7);
+  background: var(--weekend);
+  pointer-events: none;
+}
+
+.weekendSat {
+  left: calc(100% * 5 / 7);
+}
+
+.weekendSun {
+  left: calc(100% * 6 / 7);
+}
+
+.weekLabel {
+  position: relative;
+  z-index: 1;
+}
+
+.body {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 0;
+  position: relative;
+}
+
+.row {
+  position: relative;
+  height: var(--row-height);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.gridLines {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  pointer-events: none;
+}
+
+.gridCol {
+  position: relative;
+  height: 100%;
+  border-right: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+}
+
+.bar {
+  position: absolute;
+  top: 8px;
+  height: calc(var(--row-height) - 16px);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  padding: 0 0.45rem;
+  overflow: hidden;
+  min-width: 8px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  filter: brightness(1.06);
+  outline: 1px solid rgba(255, 255, 255, 0.55);
+  outline-offset: 1px;
+}
+
+.selected {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+  z-index: 2;
+}
+
+.barLabel {
+  font-size: 0.68rem;
+  font-weight: 550;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  gap: 0.4rem;
+  align-items: baseline;
+}
+
+.pct {
+  opacity: 0.85;
+  font-weight: 450;
+}
+
+.toolbarNavOnly {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: var(--toolbar-height);
+  padding: 0 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
+.emphasisRow {
+  background: rgba(28, 35, 43, 0.03);
+}
+
+.emphasisBar {
+  top: 6px;
+  height: calc(var(--row-height) - 12px);
+  opacity: 0.92;
+}
+
+.milestone {
+  top: 11px;
+  height: 12px;
+  width: 12px !important;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  padding: 0;
+  min-width: 0;
+}
+
+.gapBar {
+  top: 10px;
+  height: calc(var(--row-height) - 20px);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(47, 111, 94, 0.12),
+    rgba(47, 111, 94, 0.12) 3px,
+    rgba(47, 111, 94, 0.04) 3px,
+    rgba(47, 111, 94, 0.04) 7px
+  );
+  border: 1px dashed rgba(47, 111, 94, 0.45);
+  color: var(--accent);
+}
+
+.gapBar .barLabel {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.overloadBar {
+  top: 4px;
+  height: calc(var(--row-height) - 8px);
+  background: rgba(180, 35, 24, 0.18);
+  border: 1px solid rgba(180, 35, 24, 0.55);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.overloadBar .barLabel {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.empty {
+  padding: 2rem 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.sliderBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 0.75rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
+.slider {
+  flex: 1;
+  min-width: 0;
+  height: 1.1rem;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.sliderEdge {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.sliderWindow {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

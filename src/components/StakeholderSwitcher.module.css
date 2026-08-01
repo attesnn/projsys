@@ -1,0 +1,43 @@
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.select {
+  max-width: 11rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.4rem;
+}
+
+@media (max-width: 900px) {
+  .wrap {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+
+  .select {
+    max-width: 9rem;
+  }
+}

@@ -1,0 +1,301 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  min-height: var(--toolbar-height);
+  padding: 0.4rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.48fr) minmax(0, 0.52fr);
+  flex: 1;
+  min-height: 0;
+}
+
+.treePane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  height: var(--toolbar-height);
+  min-height: var(--toolbar-height);
+  padding: 0 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.treeHeader {
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  padding: 0 0.85rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
+  box-sizing: border-box;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: var(--ink);
+  color: var(--surface);
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.7rem;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--ink-soft);
+}
+
+.ghost {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+}
+
+.ghost:hover {
+  background: var(--row-hover);
+}
+
+.list {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  background: var(--surface);
+}
+
+.project {
+  border-bottom: 1px solid var(--border);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  height: var(--row-height);
+  min-height: var(--row-height);
+  max-height: var(--row-height);
+  padding-right: 0.75rem;
+  box-sizing: border-box;
+}
+
+.projectRow {
+  padding-left: 0.35rem;
+  background: var(--header-bg);
+}
+
+.projectRow:hover {
+  background: #e9eef1;
+}
+
+.assignmentRow {
+  padding-left: 1.5rem;
+}
+
+.assignmentRow:hover {
+  background: var(--row-hover);
+}
+
+.taskRow {
+  padding-left: 3.25rem;
+}
+
+.taskRow:hover {
+  background: var(--row-hover);
+}
+
+.toggle {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  width: 1.4rem;
+  height: 1.4rem;
+  flex-shrink: 0;
+  font-size: 0.55rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle:hover {
+  color: var(--ink);
+}
+
+.projectFields {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.projectName {
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 140px;
+}
+
+.projectNumber {
+  color: var(--muted);
+  min-width: 80px;
+  max-width: 110px;
+}
+
+.meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.children {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.assignment {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.assignment:last-child {
+  border-bottom: none;
+}
+
+.assignmentInfo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+}
+
+.resourceName {
+  font-weight: 550;
+  color: var(--ink);
+}
+
+.dim {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.alloc {
+  font-size: 0.72rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.dateEdit {
+  width: 118px;
+  flex-shrink: 0;
+}
+
+.editingAssignment {
+  background: rgba(47, 111, 94, 0.06);
+}
+
+.tasks {
+  /* keep flat — no extra padding so row heights match Gantt */
+}
+
+.taskBullet {
+  width: 1.4rem;
+  text-align: center;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.taskTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.taskStatus {
+  width: 110px;
+  flex-shrink: 0;
+}
+
+.taskDue {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.deleteBtn {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0;
+  width: 1.5rem;
+}
+
+.taskRow:hover .deleteBtn,
+.assignmentRow:hover .deleteBtn {
+  opacity: 1;
+}
+
+.deleteBtn:hover {
+  color: var(--danger);
+}
+
+.empty {
+  padding: 1rem 1.25rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.emptyChild {
+  padding-left: 3rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.emptyTask {
+  padding-left: 4.5rem;
+}
+
+@media (max-width: 960px) {
+  .split {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 280px;
+  }
+
+  .treePane {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
