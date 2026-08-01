@@ -4,18 +4,24 @@
 
 ## One-line summary
 
-Single-user, Excel-like **human resource / project planning** web app. Next.js + React + TypeScript. All data in **browser `localStorage`** (`projsys_v1`). No backend, no auth.
+Single-user, Excel-like **human resource / project planning** web app. Next.js + React + TypeScript. Domain data in **PostgreSQL** via **Prisma** and Next.js Route Handlers (`/api/app-data`). No real auth (demo stakeholder switcher only).
 
 ## How to run
 
 ```bash
-cd /home/atte/Documents/projsys
-npm install          # required if node_modules is missing
+cd /workspace   # or your local clone path
+cp .env.example .env   # if needed; default URL matches docker-compose
+npm install
+npm run db:up          # starts Postgres 16 via Docker Compose
+npx prisma migrate deploy
+npm run prisma:seed    # optional; GET /api/app-data also auto-seeds when empty
 npm run dev -- --port 3000
 ```
 
 Open http://localhost:3000  
-**Reset demo data:** header → “Reset data” (rewrites localStorage from seed). Required after seed changes — otherwise the browser keeps the previous `projsys_v1` blob.
+**Reset demo data:** header → “Reset data” (reseeds Postgres from `createSeedData()`).
+
+If Docker is unavailable, point `DATABASE_URL` at any PostgreSQL 16 instance and create a user/db matching the URL (default `projsys` / `projsys` / `projsys`).
 
 If Turbopack errors with “Next.js package not found”, reinstall deps (`npm install`) and restart. Prefer not combining `pkill -f "next"` with the same shell that starts the server.
 
@@ -93,18 +99,17 @@ stakeholderRole: "manager" | "resource"  // demo persona switch; default manager
 actingAsResourceId: string  // which Resource you are when role is resource
 ```
 
-Persisted with the same localStorage blob. UI: `FilterSortBar.tsx`, `StakeholderSwitcher.tsx` in the header.  
+Persisted with the same `AppData` snapshot in Postgres (`UiState` row). UI: `FilterSortBar.tsx`, `StakeholderSwitcher.tsx` in the header.  
 In **resource** role, queries force the acting person as the resource filter (manager filters for Resource/Type are hidden).  
 **Removed (do not reintroduce unless asked):** column locking / `lockedColumns`.
 
 ### Storage / load
 
-- Key: **`projsys_v1`** (`STORAGE_KEY` in `store.ts`).
-- `loadAppData()`: merge stored JSON onto seed defaults; `normalizeUi()`; migrate:
-  - tasks with legacy `due` → `start`/`end`
-  - resources missing `notes` → `notes: ""`
-  - assignments: strip legacy `allocationPct`
-  - UI `sortKey` of `allocationPct` → default sort
+- **PostgreSQL** via Prisma (`prisma/schema.prisma`). Tables mirror domain entities + singleton `UiState`.
+- Client: `StoreContext` loads with `GET /api/app-data`, persists with debounced `PUT /api/app-data`, resets with `POST /api/app-data/reset`.
+- Server helpers: `src/lib/appDataDb.ts` (assemble / replace snapshot / ensure seed / reset).
+- Empty DB: first `GET` auto-seeds from `createSeedData()`.
+- Legacy `localStorage` helpers remain in `store.ts` for migrations/history helpers but are **not** on the hot path.
 - Seed: `src/lib/seed.ts` — **~50 resources**, **8 work projects + Time off**, assignment/task **dates randomized** on each seed/reset with **frequent idle gaps** (open capacity). ~1/5 resources also get a deliberate double-booked stretch. Ava Lind still gets a Harbor/Metro task conflict near today. **Reset data** to load a new draw.
 
 ---
@@ -183,16 +188,25 @@ In **resource** role, queries force the acting person as the resource filter (ma
 ## Architecture / files
 
 ```
+prisma/
+  schema.prisma                # PostgreSQL models (mirrors AppData entities + UiState)
+  seed.ts                      # prisma db seed → createSeedData + saveAppDataToDb
+  migrations/                  # initial schema migration
+docker-compose.yml             # Postgres 16 for local dev
 src/
   app/
     layout.tsx                 # Fraunces + Source Sans 3, wraps StoreProvider
     page.tsx                   # renders AppShell
     globals.css                # CSS variables (--row-height 36px, --accent teal, etc.)
-  context/StoreContext.tsx     # load on mount; setData → saveAppData; reset; getHistory
+    api/app-data/route.ts      # GET/PUT AppData snapshot
+    api/app-data/reset/route.ts
+  context/StoreContext.tsx     # fetch GET; setData → debounced PUT; reset POST
   lib/
     types.ts                   # ALL domain types + TabId + DEFAULT_UI
     seed.ts                    # demo AppData
-    store.ts                   # mutations + changelog + migrations on load
+    store.ts                   # pure mutations + changelog (+ legacy localStorage helpers)
+    appDataDb.ts               # Prisma load/save/seed helpers
+    db.ts                      # PrismaClient singleton
     query.ts                   # filteredSorted* / assignmentsForResource
     conflicts.ts               # task overlap detection + grouping
     allocation.ts              # workday Alloc%/Free%/Busy% + free/overload spans
@@ -216,7 +230,7 @@ src/
 
 **Client components:** anything using store/hooks is `"use client"`.
 
-**State pattern:** one `AppData` in context; updates via `setData(prev => mutate(prev))` which also writes localStorage. Prefer pure helpers in `store.ts` / `query.ts` / `conflicts.ts` — keep UI components thin.
+**State pattern:** one `AppData` in context; updates via `setData(prev => mutate(prev))` which debounces a `PUT /api/app-data`. Prefer pure helpers in `store.ts` / `query.ts` / `conflicts.ts` — keep UI components thin.
 
 ### Important store helpers (`store.ts`)
 
@@ -261,7 +275,7 @@ Not real auth — demo persona switch only.
 - A row may use top-level `start`/`end` **or** `bars: GanttBar[]` (multi-allocation).
 - `GanttBar.kind`: `"assignment"` (default) | `"gap"` (Open capacity) | `"overload"` (Heavy / double-booked). Gap/overload bars are not clickable.
 - Parent must keep **left pane row count === `rows.length`** and sync `scrollTop` both ways.
-- **Scales** (`ui.ganttScale`, default `month`): Week | Month | Quarter | Year — shared across Projects and Resource allocation; persisted in localStorage.
+- **Scales** (`ui.ganttScale`, default `month`): Week | Month | Quarter | Year — shared across Projects and Resource allocation; persisted in Postgres with `AppData`.
   - Timeline **fits pane width** (`ResizeObserver` → `pxPerDay = width / spanDays`); window length is ~1 week / 30 days / 91 days / 12 months.
   - **← / →** nudge by ~1/10 of the window (week ±1 day, month ±3 days, quarter ±9 days, year ±2 months) — sliding window, not a full-period jump.
   - **Bottom slider** scrubs the window across the timeline domain (~today−60d → today+400d); shows domain edges + visible range.
@@ -284,7 +298,7 @@ Not real auth — demo persona switch only.
 
 ## History of decisions (do not casually reverse)
 
-1. Persistence = **localStorage only** (not DB) for v1.  
+1. Persistence was localStorage for the prototype; now **PostgreSQL + Prisma** via `/api/app-data` (full AppData snapshot). Real multi-user auth still deferred.
 2. Original “Resources” tab renamed → **Resource allocation**; rows became **resources** (not assignment lines).  
 3. Added **Available resources** as people master.  
 4. Tasks: **`start`/`end`**, not `due`.  
@@ -301,7 +315,8 @@ Not real auth — demo persona switch only.
 
 ## Out of scope (v1) — ask before building
 
-- Multi-user, auth, server sync  
+- Multi-user tenancy / real auth (stakeholder switcher remains a demo persona)  
+- Per-entity REST CRUD (current API replaces the whole AppData snapshot)  
 - Drag-resize / drag-create Gantt bars  
 - Excel import/export  
 - Treating Assignment overlap (without tasks) as a conflict (unless product asks)
@@ -312,7 +327,7 @@ Not real auth — demo persona switch only.
 
 - Optional: treat overlapping Assignments (without tasks) as a first-class conflict UI, beyond Busy % / Heavy bars.  
 - JSON export/import.  
-- Backend / real auth when the prototype is validated (replace demo stakeholder switcher).
+- Real auth when validated (replace demo stakeholder switcher); finer-grained mutation APIs if snapshot PUT becomes a bottleneck.
 
 ---
 
