@@ -168,6 +168,32 @@ export function ProjectsTab() {
     setCollapsedAssignments(new Set(data.assignments.map((a) => a.id)));
   }
 
+  /** Collapse deepest open level first (tasks under stints, then projects). */
+  function collapseOneLevel() {
+    const openAssignmentIds: string[] = [];
+    for (const { project, assignments } of tree) {
+      if (collapsedProjects.has(project.id)) continue;
+      for (const { assignment } of assignments) {
+        if (!collapsedAssignments.has(assignment.id)) {
+          openAssignmentIds.push(assignment.id);
+        }
+      }
+    }
+    if (openAssignmentIds.length > 0) {
+      setCollapsedAssignments((prev) => {
+        const next = new Set(prev);
+        for (const id of openAssignmentIds) next.add(id);
+        return next;
+      });
+      return;
+    }
+    setCollapsedProjects((prev) => {
+      const next = new Set(prev);
+      for (const { project } of tree) next.add(project.id);
+      return next;
+    });
+  }
+
   return (
     <div className={styles.root}>
       <div className={styles.topBar}>
@@ -185,12 +211,30 @@ export function ProjectsTab() {
                 Add project
               </button>
             )}
-            <button type="button" className={styles.ghost} onClick={expandAll}>
-              Expand all
-            </button>
-            <button type="button" className={styles.ghost} onClick={collapseAll}>
-              Collapse all
-            </button>
+            <div className={styles.treeActions}>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={expandAll}
+              >
+                Expand all
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseOneLevel}
+                title="Collapse the deepest expanded level"
+              >
+                Collapse one level
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseAll}
+              >
+                Collapse all
+              </button>
+            </div>
           </div>
 
           <div className={styles.treeHeader}>Hierarchy</div>

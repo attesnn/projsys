@@ -20,6 +20,8 @@ export interface Resource {
   id: string;
   name: string;
   type: string;
+  /** Organizational team (e.g. Quay & Civil). */
+  team: string;
   notes: string;
 }
 
@@ -86,6 +88,7 @@ export interface AppUiState {
   filterProjectId: string;
   filterResourceId: string;
   filterResourceType: string;
+  filterResourceTeam: string;
   sortKey: SortKey;
   sortDir: SortDir;
   ganttScale: GanttScale;
@@ -107,6 +110,7 @@ export const DEFAULT_UI: AppUiState = {
   filterProjectId: "",
   filterResourceId: "",
   filterResourceType: "",
+  filterResourceTeam: "",
   sortKey: "projectName",
   sortDir: "asc",
   ganttScale: "month",
@@ -130,6 +134,7 @@ export type TabId =
   | "projects"
   | "allocations"
   | "available"
+  | "teams"
   | "skills"
   | "tasks";
 

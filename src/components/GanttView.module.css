@@ -223,7 +223,24 @@
 .emphasisBar {
   top: 6px;
   height: calc(var(--row-height) - 12px);
-  opacity: 0.92;
+  opacity: 0.95;
+}
+
+.emphasisBar .barLabel {
+  font-weight: 650;
+}
+
+/** Task bars: shorter + translucent so they read below project stints. */
+.taskBar {
+  top: 11px;
+  height: calc(var(--row-height) - 22px);
+  opacity: 0.72;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+}
+
+.taskBar .barLabel {
+  font-size: 0.64rem;
+  font-weight: 450;
 }
 
 .milestone {
@@ -234,25 +251,6 @@
   transform: rotate(45deg);
   padding: 0;
   min-width: 0;
-}
-
-.gapBar {
-  top: 10px;
-  height: calc(var(--row-height) - 20px);
-  background: repeating-linear-gradient(
-    -45deg,
-    rgba(47, 111, 94, 0.12),
-    rgba(47, 111, 94, 0.12) 3px,
-    rgba(47, 111, 94, 0.04) 3px,
-    rgba(47, 111, 94, 0.04) 7px
-  );
-  border: 1px dashed rgba(47, 111, 94, 0.45);
-  color: var(--accent);
-}
-
-.gapBar .barLabel {
-  color: var(--accent);
-  font-weight: 500;
 }
 
 .overloadBar {
@@ -275,37 +273,40 @@
   font-size: 0.85rem;
 }
 
-.sliderBar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.hScrollBar {
   flex-shrink: 0;
-  height: 36px;
-  padding: 0 0.75rem;
+  height: 18px;
+  overflow-x: scroll;
+  overflow-y: hidden;
   border-top: 1px solid var(--border);
   background: var(--surface);
   box-sizing: border-box;
+  /* Always show a scrollbar gutter (Firefox + modern Chromium). */
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+  scrollbar-color: #8a939c var(--border);
 }
 
-.slider {
-  flex: 1;
-  min-width: 0;
-  height: 1.1rem;
-  cursor: pointer;
-  accent-color: var(--accent);
+.hScrollBar::-webkit-scrollbar {
+  height: 18px;
+  background: var(--border);
 }
 
-.sliderEdge {
-  flex-shrink: 0;
-  font-size: 0.62rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
+.hScrollBar::-webkit-scrollbar-track {
+  background: var(--border);
 }
 
-.sliderWindow {
-  flex-shrink: 0;
-  font-size: 0.62rem;
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.hScrollBar::-webkit-scrollbar-thumb {
+  background: #8a939c;
+  border: 2px solid var(--border);
+  border-radius: 2px;
+  min-width: 40px;
+}
+
+.hScrollBar::-webkit-scrollbar-thumb:hover {
+  background: #6d767f;
+}
+
+.hScrollInner {
+  height: 1px;
 }

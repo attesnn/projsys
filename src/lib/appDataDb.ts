@@ -17,6 +17,7 @@ function toAppUi(row: {
   filterProjectId: string;
   filterResourceId: string;
   filterResourceType: string;
+  filterResourceTeam: string;
   sortKey: string;
   sortDir: string;
   ganttScale: string;
@@ -28,6 +29,7 @@ function toAppUi(row: {
     filterProjectId: row.filterProjectId,
     filterResourceId: row.filterResourceId,
     filterResourceType: row.filterResourceType,
+    filterResourceTeam: row.filterResourceTeam ?? "",
     sortKey: (row.sortKey as AppUiState["sortKey"]) || DEFAULT_UI.sortKey,
     sortDir: (row.sortDir as AppUiState["sortDir"]) || DEFAULT_UI.sortDir,
     ganttScale: (row.ganttScale as AppUiState["ganttScale"]) || DEFAULT_UI.ganttScale,
@@ -124,6 +126,7 @@ export async function saveAppDataToDb(data: AppData): Promise<void> {
         filterProjectId: data.ui.filterProjectId,
         filterResourceId: data.ui.filterResourceId,
         filterResourceType: data.ui.filterResourceType,
+        filterResourceTeam: data.ui.filterResourceTeam,
         sortKey: data.ui.sortKey,
         sortDir: data.ui.sortDir,
         ganttScale: data.ui.ganttScale,

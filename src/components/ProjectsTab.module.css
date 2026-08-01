@@ -35,8 +35,8 @@
 .toolbar {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
   height: var(--toolbar-height);
   min-height: var(--toolbar-height);
   padding: 0 0.85rem;
@@ -44,6 +44,14 @@
   background: var(--surface);
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.treeActions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .treeHeader {
@@ -80,9 +88,10 @@
   background: var(--surface);
   color: var(--ink);
   font: inherit;
-  font-size: 0.75rem;
-  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+  padding: 0.22rem 0.5rem;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .ghost:hover {

@@ -5,7 +5,6 @@ import { useStore } from "@/context/StoreContext";
 import {
   analyzeResourceAllocation,
   formatAllocPct,
-  freeGapsInWindow,
   overloadSpansInWindow,
 } from "@/lib/allocation";
 import {
@@ -33,6 +32,7 @@ import styles from "./ResourcesTab.module.css";
 const COLS = [
   { id: "resourceName", label: "Resource", width: 200 },
   { id: "resourceType", label: "Type", width: 110 },
+  { id: "team", label: "Team", width: 140 },
   { id: "skills", label: "Skills", width: 140 },
   { id: "projects", label: "Projects", width: 140 },
   { id: "start", label: "Start", width: 100 },
@@ -45,8 +45,8 @@ const COLS = [
 
 type ColId = (typeof COLS)[number]["id"];
 
-const META_COLS_WIDTH = COLS.slice(1, 4).reduce((s, c) => s + c.width, 0);
-const AFTER_END_WIDTH = COLS.slice(6).reduce((s, c) => s + c.width, 0);
+const META_COLS_WIDTH = COLS.slice(1, 5).reduce((s, c) => s + c.width, 0);
+const AFTER_END_WIDTH = COLS.slice(7).reduce((s, c) => s + c.width, 0);
 
 function defaultWindow() {
   const now = new Date();
@@ -188,19 +188,6 @@ export function ResourcesTab() {
         };
       });
 
-      const gapBars: GanttBar[] = freeGapsInWindow(
-        row.assignments,
-        ganttWindow.start,
-        ganttWindow.end
-      ).map((gap, i) => ({
-        id: `gap_${row.resource.id}_${i}`,
-        start: gap.start,
-        end: gap.end,
-        label: "Open",
-        sublabel: "empty slot",
-        kind: "gap",
-      }));
-
       const overloadBars: GanttBar[] = overloadSpansInWindow(
         row.assignments,
         ganttWindow.start,
@@ -218,7 +205,7 @@ export function ResourcesTab() {
         id: row.resource.id,
         label: row.resource.name,
         sublabel: formatAllocPct(row.allocation.allocPct),
-        bars: [...gapBars, ...assignmentBars, ...overloadBars],
+        bars: [...assignmentBars, ...overloadBars],
       });
 
       if (!expandedResources.has(row.resource.id)) continue;
@@ -236,6 +223,7 @@ export function ResourcesTab() {
           label: project?.name ?? "Project",
           color,
           emphasis: true,
+          variant: "project",
         });
 
         if (collapsedAssignments.has(assignment.id)) continue;
@@ -253,6 +241,7 @@ export function ResourcesTab() {
             end: task.end,
             label: task.title,
             color: inConflict ? "var(--danger)" : color,
+            variant: "task",
           });
         }
       }
@@ -293,12 +282,48 @@ export function ResourcesTab() {
     });
   }
 
+  function expandAll() {
+    setExpandedResources(new Set(rows.map((r) => r.resource.id)));
+    setCollapsedAssignments(new Set());
+  }
+
+  function collapseAll() {
+    setExpandedResources(new Set());
+    setCollapsedAssignments(
+      new Set(data.assignments.map((a) => a.id))
+    );
+  }
+
+  /** Collapse deepest open level first (tasks under stints, then resources). */
+  function collapseOneLevel() {
+    const openAssignmentIds: string[] = [];
+    for (const row of rows) {
+      if (!expandedResources.has(row.resource.id)) continue;
+      for (const { assignment } of row.assignmentRows) {
+        if (!collapsedAssignments.has(assignment.id)) {
+          openAssignmentIds.push(assignment.id);
+        }
+      }
+    }
+    if (openAssignmentIds.length > 0) {
+      setCollapsedAssignments((prev) => {
+        const next = new Set(prev);
+        for (const id of openAssignmentIds) next.add(id);
+        return next;
+      });
+      return;
+    }
+    setExpandedResources(new Set());
+  }
+
   function cellValue(row: (typeof rows)[number], colId: ColId): string {
     switch (colId) {
       case "resourceName":
         return row.resource.name;
       case "resourceType":
         return row.resource.type;
+      case "team":
+        return row.resource.team;
       case "skills":
         return row.skills;
       case "projects":
@@ -387,21 +412,30 @@ export function ResourcesTab() {
       );
     }
 
-    if (colId === "resourceType" || colId === "notes") {
-      const field = colId === "resourceType" ? "type" : "notes";
-      const label = colId === "resourceType" ? "Type" : "Notes";
-      const typeLocked = colId === "resourceType" && !manager;
+    if (colId === "resourceType" || colId === "team" || colId === "notes") {
+      const field =
+        colId === "resourceType" ? "type" : colId === "team" ? "team" : "notes";
+      const label =
+        colId === "resourceType" ? "Type" : colId === "team" ? "Team" : "Notes";
+      const managerLocked =
+        (colId === "resourceType" || colId === "team") && !manager;
       return (
         <div className={styles.cellWrap}>
           <EditableCell
             value={value}
-            readOnly={typeLocked}
+            readOnly={managerLocked}
             title={
-              typeLocked
-                ? "Type is managed by the resource manager"
+              managerLocked
+                ? `${label} is managed by the resource manager`
                 : undefined
             }
-            placeholder={colId === "notes" ? "Add note…" : undefined}
+            placeholder={
+              colId === "notes"
+                ? "Add note…"
+                : colId === "team"
+                  ? "Team…"
+                  : undefined
+            }
             onCommit={(v) =>
               setData((prev) =>
                 updateResourceField(prev, row.resource.id, field, v)
@@ -465,10 +499,36 @@ export function ResourcesTab() {
 
   return (
     <div className={styles.root}>
+      <div className={styles.topBar}>
+        <FilterSortBar />
+      </div>
       <div className={styles.split}>
         <div className={styles.gridPane}>
           <div className={styles.toolbar}>
-            <FilterSortBar />
+            <div className={styles.treeActions}>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={expandAll}
+              >
+                Expand all
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseOneLevel}
+                title="Collapse the deepest expanded level"
+              >
+                Collapse one level
+              </button>
+              <button
+                type="button"
+                className={styles.ghost}
+                onClick={collapseAll}
+              >
+                Collapse all
+              </button>
+            </div>
           </div>
 
           <div className={styles.gridHeader} ref={headerScrollRef}>

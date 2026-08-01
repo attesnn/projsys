@@ -34,6 +34,7 @@ If Turbopack errors with “Next.js package not found”, reinstall deps (`npm i
 | Projects | `projects` | `ProjectsTab.tsx` | Project-centric hierarchy: **Project → Assignment(resource) → Tasks**. Gantt on the right. |
 | Resource allocation | `allocations` | `ResourcesTab.tsx` | **Resource-centric** planning grid (one row per person) + multi-bar Gantt. Conflict expand tree. |
 | Available resources | `available` | `AvailableResourcesTab.tsx` | Master list of people (CRUD). Status Available / Booked for today. |
+| Teams | `teams` | `TeamsTab.tsx` | Resources grouped by team; workload from assigned tasks + monthly Alloc/Busy %. |
 | Skills | `skills` | `SkillsTab.tsx` | Resource × skill matrix (levels `"1"`…`"5"`). |
 | Tasks | `tasks` | `TasksTab.tsx` | Flat editable task table. |
 
@@ -45,8 +46,8 @@ Header **View as** (`StakeholderSwitcher.tsx`, persisted as `ui.stakeholderRole`
 
 | Role | Tabs shown | Data scope | Edit rights |
 |------|------------|------------|-------------|
-| **Resource manager** (default) | Projects, Resource allocation, Available resources, Skills, Tasks | All people/projects (plus shared filters) | Full (current manager behavior). **Reset data** visible. |
-| **Resource (self)** | **My schedule**, **My projects**, **My tasks** | Forced to the selected person via `effectiveResourceFilterId` | Own **task** title/status/start/end + own **notes**. Cannot add/remove people, projects, stints, or tasks; cannot edit project/assignment dates, name/type, or reassign tasks. Available resources + Skills hidden. Reset data hidden. |
+| **Resource manager** (default) | Projects, Resource allocation, Available resources, Teams, Skills, Tasks | All people/projects (plus shared filters) | Full (current manager behavior). **Reset data** visible. |
+| **Resource (self)** | **My schedule**, **My projects**, **My tasks** | Forced to the selected person via `effectiveResourceFilterId` | Own **task** title/status/start/end + own **notes**. Cannot add/remove people, projects, stints, or tasks; cannot edit project/assignment dates, name/type/team, or reassign tasks. Available resources + Teams + Skills hidden. Reset data hidden. |
 
 Helpers: `src/lib/roles.ts` — `isManager`, `isResourceRole`, `actingAsResourceId`, `actingAsResource`, `effectiveResourceFilterId`.  
 Banner under the header reminds you who you are acting as. My schedule auto-expands that person’s stint tree.
@@ -61,7 +62,7 @@ Defined in `src/lib/types.ts`. Persisted as one JSON object `AppData`.
 
 ```
 Project { id, name, number }
-Resource { id, name, type, notes }          ← notes are free-text on the person
+Resource { id, name, type, team, notes }   ← team = org unit; notes free-text
 Skill { id, name, category }
 ResourceSkill { id, resourceId, skillId, level, notes }
 Assignment { id, projectId, resourceId, start, end }
@@ -92,6 +93,7 @@ ChangeLogEntry { id, entityType, entityId, field, oldValue, newValue, at }
 filterProjectId: string   // "" = all
 filterResourceId: string  // "" = all
 filterResourceType: string // "" = all; matches Resource.type
+filterResourceTeam: string // "" = all; matches Resource.team
 sortKey: SortKey
 sortDir: "asc" | "desc"
 ganttScale: "week" | "month" | "quarter" | "year"  // shared Gantt zoom; default month
@@ -110,7 +112,7 @@ In **resource** role, queries force the acting person as the resource filter (ma
 - Server helpers: `src/lib/appDataDb.ts` (assemble / replace snapshot / ensure seed / reset).
 - Empty DB: first `GET` auto-seeds from `createSeedData()`.
 - Legacy `localStorage` helpers remain in `store.ts` for migrations/history helpers but are **not** on the hot path.
-- Seed: `src/lib/seed.ts` — **~50 resources**, **8 work projects + Time off**, assignment/task **dates randomized** on each seed/reset with **frequent idle gaps** (open capacity). ~1/5 resources also get a deliberate double-booked stretch. Ava Lind still gets a Harbor/Metro task conflict near today. **Reset data** to load a new draw.
+- Seed: `src/lib/seed.ts` — **~50 resources** on port-terminal teams, **8 terminal work projects + Time off**, assignment/task **dates randomized** on each seed/reset with **frequent idle gaps** (open capacity). ~1/5 resources also get a deliberate double-booked stretch. Amara Okoye (`res_ava`) still gets a Berth 4 / Yard Reefer task conflict near today. **Reset data** to load a new draw.
 
 ---
 
@@ -134,7 +136,7 @@ In **resource** role, queries force the acting person as the resource filter (ma
 3. Conflicting tasks are tinted and show “conflicts with {other project}: {other task}”; their Gantt bars use `--danger`.
 4. Gantt inserts matching rows when expanded (stint rollup bar; task bars).
 
-**Demo seed conflict:** Ava Lind (`res_ava`) has Harbor Bridge tasks (“Foundation load review”, “Deck span drawings”) overlapping City Metro “Metro alignment study”. Use **Reset data** after pulling seed changes.
+**Demo seed conflict:** Amara Okoye (`res_ava`) has Berth 4 Expansion tasks (“Quay wall load review”, “Berth apron drawings”) overlapping Yard Reefer Power “Reefer power alignment study”. Use **Reset data** after pulling seed changes.
 
 ---
 
@@ -154,7 +156,7 @@ In **resource** role, queries force the acting person as the resource filter (ma
 - **Alloc %** = weekdays with ≥1 work assignment ÷ weekdays in window (weekends ignored). Time off does not count as work.
 - **Free %** = weekdays with no assignment at all (open capacity). Highlighted when ≥20%.
 - **Busy %** = weekdays with ≥2 overlapping work assignments (heavy load). Highlighted when >0.
-- Gantt resource row: assignment bars + hatched **Open** gap bars (`kind: "gap"`) for empty stretches + **Heavy** overlay (`kind: "overload"`) where double-booked. Window comes from Gantt `onRangeChange`.
+- Gantt resource row: assignment bars + **Heavy** overlay (`kind: "overload"`) where double-booked. Window comes from Gantt `onRangeChange`. (Open/empty-slot gap bars removed from the Gantt; Free % column still shows open capacity.)
 - Expand resource (▶) → **Assignments as project stints** (sorted by start; dates read-only) → **Tasks** (title / start / end editable).
 - **Manager:** Resource name/type editable; Notes editable; `+` add stint / add task; delete stint/task.
 - **Resource self:** single row (themselves); name/type locked; Notes + own task fields editable; no add/delete stint or task; tree auto-expanded.
@@ -165,8 +167,14 @@ In **resource** role, queries force the acting person as the resource filter (ma
 
 ### Available resources (`AvailableResourcesTab.tsx`)
 
-- Manager-only tab. CRUD people; editable name/type; skills RO; active projects today.
+- Manager-only tab. CRUD people; editable name/type/team; skills RO; active projects today.
 - Status: **Available** (no assignment covers today) / **Booked** (at least one does).
+
+### Teams (`TeamsTab.tsx`)
+
+- Manager-only tab. Resources grouped by `Resource.team` (empty → “Unassigned”).
+- Left: team row rollups (people, tasks, active/todo/in progress/done, avg Alloc/Busy %). Expand → per-resource workload from assigned tasks.
+- Right: Gantt of team allocation — team row shows all member booking bars (project-colored) plus Heavy overlays when the team has concurrent work load; expand syncs member rows. Alloc/Busy % follow the visible Gantt window.
 
 ### Skills (`SkillsTab.tsx`)
 
@@ -214,15 +222,17 @@ src/
     dates.ts                   # Gantt timeline math (week/month/quarter/year)
     id.ts                      # createId(prefix)
   components/
-    AppShell.tsx               # tab chrome + stakeholder switcher + reset
+    AppShell.tsx               # tab chrome + stakeholder switcher + Guide + reset
+    GuideDialog.tsx            # header Guide pop-up: domain / metrics / conflicts / roles
     StakeholderSwitcher.tsx    # View as manager / resource (pick person)
     FilterSortBar.tsx          # shared filters/sort
     ProjectsTab.tsx
-    ResourcesTab.tsx           # allocations + Alloc/Free/Busy + Open/Heavy Gantt + role locks
+    ResourcesTab.tsx           # allocations + Alloc/Free/Busy + Heavy Gantt + role locks
     AvailableResourcesTab.tsx
+    TeamsTab.tsx               # team groups + task workload rollups
     SkillsTab.tsx
     TasksTab.tsx               # flat tasks; resource-self locks reassignment/CRUD
-    GanttView.tsx              # scales, fit-to-width, slider, gap/overload kinds, onRangeChange
+    GanttView.tsx              # scales, fit-to-width, h-scrollbar, overload kind, onRangeChange
     AssignmentEditPopover.tsx  # edit project / start / end from Gantt click (Projects, manager)
     EditableCell.tsx           # double-click / F2; Enter commit; Esc cancel; history ↻
     HistoryPopover.tsx
@@ -239,10 +249,10 @@ src/
 | `updateAssignmentField` | Mutate assignment-linked fields (may `ensureProject` / `ensureResource`) |
 | `addAssignment` / `addAssignmentForResource` / `deleteAssignment` | Allocation CRUD (delete removes linked tasks) |
 | `updateProjectField` / `addProject` | Projects |
-| `addResource` / `updateResourceField(name\|type\|notes)` / `deleteResource` | People (delete cascades assignments, tasks, resourceSkills) |
+| `addResource` / `updateResourceField(name\|type\|team\|notes)` / `deleteResource` | People (delete cascades assignments, tasks, resourceSkills) |
 | `updateTaskField(title\|status\|start\|end)` / `addTask` / `addTaskToAssignment` / `deleteTask` / `updateTaskAssignment` | Tasks |
 | `updateResourceSkillLevel` / `addSkill` / `removeSkill` | Skills |
-| `setFilterProjectId` / `setFilterResourceId` / `setFilterResourceType` / `setSort` / `toggleSortDir` / `clearFilters` / `setGanttScale` / `setStakeholderRole` / `setActingAsResourceId` | Shared UI |
+| `setFilterProjectId` / `setFilterResourceId` / `setFilterResourceType` / `setFilterResourceTeam` / `setSort` / `toggleSortDir` / `clearFilters` / `setGanttScale` / `setStakeholderRole` / `setActingAsResourceId` | Shared UI |
 | `resetToSeed` | Wipe to demo |
 
 ### Query helpers (`query.ts`)
@@ -258,7 +268,7 @@ Respect `data.ui` filters in every list tab. Resource id filtering goes through 
 Workday math over a window `[start, end]` (weekends excluded from denominator and counters):
 
 - `analyzeResourceAllocation(assignments, windowStart, windowEnd)` → Alloc % / Free % / Busy % (+ counts, `peakLoad`)
-- `freeGapsInWindow(...)` → contiguous empty calendar spans (for Gantt **Open** bars)
+- `freeGapsInWindow(...)` → contiguous empty calendar spans (helper retained; not drawn on Gantt)
 - `overloadSpansInWindow(...)` → spans with ≥2 concurrent work assignments (for **Heavy** bars)
 
 Time off counts as neither work nor free (blocks availability without raising Alloc %).
@@ -273,12 +283,12 @@ Not real auth — demo persona switch only.
 
 - Props: `rows: GanttRow[]`, `bodyRef`, `onBodyScroll`, optional `title`, `hideToolbar`, `onBarClick`, `selectedBarId`, **`onRangeChange({ start, end })`** (fires when the visible window moves — used by Resource allocation metrics).
 - A row may use top-level `start`/`end` **or** `bars: GanttBar[]` (multi-allocation).
-- `GanttBar.kind`: `"assignment"` (default) | `"gap"` (Open capacity) | `"overload"` (Heavy / double-booked). Gap/overload bars are not clickable.
+- `GanttBar.kind`: `"assignment"` (default) | `"overload"` (Heavy / double-booked). Overload bars are not clickable. (`"gap"` remains typed but is unused in the UI.)
 - Parent must keep **left pane row count === `rows.length`** and sync `scrollTop` both ways.
 - **Scales** (`ui.ganttScale`, default `month`): Week | Month | Quarter | Year — shared across Projects and Resource allocation; persisted in Postgres with `AppData`.
   - Timeline **fits pane width** (`ResizeObserver` → `pxPerDay = width / spanDays`); window length is ~1 week / 30 days / 91 days / 12 months.
   - **← / →** nudge by ~1/10 of the window (week ±1 day, month ±3 days, quarter ±9 days, year ±2 months) — sliding window, not a full-period jump.
-  - **Bottom slider** scrubs the window across the timeline domain (~today−60d → today+400d); shows domain edges + visible range.
+  - **Bottom horizontal scrollbar** scrubs the window across the timeline domain (~today−60d → today+400d); native scroll thumb sized to the visible window.
   - **Week:** 7 day columns. **Month:** day columns. **Quarter:** week columns. **Year:** month columns labeled with year (e.g. `Jan 2026`).
   - Today (and scale change) snaps `rangeStart` to the active scale’s alignment (Mon / month start / quarter start / Jan 1).
 - Gantt pane must be height-constrained (`min-height: 0`, `height: 100%`, `overflow: hidden` on root **and** left panes) so the body scrolls and stays synced with the left pane.
@@ -308,9 +318,11 @@ Not real auth — demo persona switch only.
 8. Assignment **start / end** editable on **Projects** (inline + Gantt popover). On **Resource allocation**, expand edits **task** title/start/end; assignment dates stay read-only.  
 9. **`allocationPct` / Peak % / Free % removed** as stored assignment fields — bookings are date ranges only. Resource allocation now shows **derived** workday Alloc % / Free % / Busy % for the visible Gantt window (weekends ignored). Available resources status remains Available vs Booked for today.  
 10. Seed scaled to **~50 resources** and **~1 year** of stints/tasks; **Time off** project + Gantt weekend shading; dates **randomized** each reset with **idle gaps** and occasional deliberate double-books.  
-11. Gantt is **fit-to-width** with Week/Month/Quarter/Year scales, incremental nav (~1/10 window), year labels on month ticks, and a **bottom scrub slider** — not a fixed 12×72px week strip.  
-12. Shared **Type** filter (`filterResourceType`) alongside Project/Resource.  
+11. Gantt is **fit-to-width** with Week/Month/Quarter/Year scales, incremental nav (~1/10 window), year labels on month ticks, and a **bottom horizontal scrollbar** — not a range-input scrubber or fixed week strip.  
+12. Shared **Type** / **Team** filters (`filterResourceType`, `filterResourceTeam`) alongside Project/Resource.  
 13. **Stakeholder roles** are a demo switcher (manager vs resource-self), not real auth; resource mode scopes data and limits edits as above.
+14. Resource allocation Gantt no longer draws hatched **Open** empty-slot bars (Free % metrics remain).
+15. Resources have a **team**; seed uses international names for a port-terminal org; manager **Teams** tab shows grouped workload from assigned tasks.
 ---
 
 ## Out of scope (v1) — ask before building
@@ -337,6 +349,7 @@ Not real auth — demo persona switch only.
 flowchart TB
   Switch["StakeholderSwitcher\nmanager vs resource-self"]
   Available["Available resources\nResource master CRUD\nmanager only"]
+  Teams["Teams\ngroup by team + task workload\nmanager only"]
   Alloc["Resource allocation / My schedule\nrows = Resource\nGantt + Alloc/Free/Busy %"]
   Projects["Projects / My projects\nProject → Assignment → Task\n+ Gantt"]
   Skills["Skills matrix\nmanager only"]
@@ -346,6 +359,7 @@ flowchart TB
   Switch --> Projects
   Switch --> Tasks
   Available --> Alloc
+  Available --> Teams
   Available --> Skills
   Alloc -.->|"assignments"| Projects
   Projects --> Tasks

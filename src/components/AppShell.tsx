@@ -7,15 +7,18 @@ import { isManager, isResourceRole, actingAsResource } from "@/lib/roles";
 import { ProjectsTab } from "./ProjectsTab";
 import { ResourcesTab } from "./ResourcesTab";
 import { AvailableResourcesTab } from "./AvailableResourcesTab";
+import { TeamsTab } from "./TeamsTab";
 import { SkillsTab } from "./SkillsTab";
 import { TasksTab } from "./TasksTab";
 import { StakeholderSwitcher } from "./StakeholderSwitcher";
+import { GuideDialog } from "./GuideDialog";
 import styles from "./AppShell.module.css";
 
 const MANAGER_TABS: { id: TabId; label: string }[] = [
   { id: "projects", label: "Projects" },
   { id: "allocations", label: "Resource allocation" },
   { id: "available", label: "Available resources" },
+  { id: "teams", label: "Teams" },
   { id: "skills", label: "Skills" },
   { id: "tasks", label: "Tasks" },
 ];
@@ -28,6 +31,7 @@ const RESOURCE_TABS: { id: TabId; label: string }[] = [
 
 export function AppShell() {
   const [tab, setTab] = useState<TabId>("allocations");
+  const [guideOpen, setGuideOpen] = useState(false);
   const { data, reset } = useStore();
   const manager = isManager(data);
   const resource = isResourceRole(data);
@@ -66,26 +70,37 @@ export function AppShell() {
             </button>
           ))}
         </nav>
-        <StakeholderSwitcher />
-        {manager && (
+        <div className={styles.headerActions}>
+          <StakeholderSwitcher />
           <button
             type="button"
-            className={styles.reset}
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Reset all data to the demo seed? This clears local changes."
-                )
-              ) {
-                reset();
-              }
-            }}
-            title="Reset demo data"
+            className={`${styles.guide} ${guideOpen ? styles.guideActive : ""}`}
+            onClick={() => setGuideOpen(true)}
+            title="How Projsys works"
           >
-            Reset data
+            Guide
           </button>
-        )}
+          {manager && (
+            <button
+              type="button"
+              className={styles.reset}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    "Reset all data to the demo seed? This clears local changes."
+                  )
+                ) {
+                  reset();
+                }
+              }}
+              title="Reset demo data"
+            >
+              Reset data
+            </button>
+          )}
+        </div>
       </header>
+      {guideOpen && <GuideDialog onClose={() => setGuideOpen(false)} />}
       {resource && me && (
         <div className={styles.roleBanner}>
           Viewing only your own bookings and tasks as <strong>{me.name}</strong>
@@ -97,6 +112,7 @@ export function AppShell() {
         {tab === "projects" && <ProjectsTab />}
         {tab === "allocations" && <ResourcesTab />}
         {tab === "available" && manager && <AvailableResourcesTab />}
+        {tab === "teams" && manager && <TeamsTab />}
         {tab === "skills" && manager && <SkillsTab />}
         {tab === "tasks" && <TasksTab />}
       </main>

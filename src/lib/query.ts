@@ -32,14 +32,16 @@ export function filterAssignments(
   data: AppData,
   assignments: Assignment[] = data.assignments
 ): Assignment[] {
-  const { filterProjectId, filterResourceType } = data.ui;
+  const { filterProjectId, filterResourceType, filterResourceTeam } = data.ui;
   const filterResourceId = effectiveResourceFilterId(data);
   return assignments.filter((a) => {
     if (filterProjectId && a.projectId !== filterProjectId) return false;
     if (filterResourceId && a.resourceId !== filterResourceId) return false;
-    if (filterResourceType) {
+    if (filterResourceType || filterResourceTeam) {
       const resource = data.resources.find((r) => r.id === a.resourceId);
-      if (!resource || resource.type !== filterResourceType) return false;
+      if (!resource) return false;
+      if (filterResourceType && resource.type !== filterResourceType) return false;
+      if (filterResourceTeam && resource.team !== filterResourceTeam) return false;
     }
     return true;
   });
@@ -97,7 +99,13 @@ function projectSortValue(
 }
 
 export function filteredSortedProjects(data: AppData): Project[] {
-  const { filterProjectId, filterResourceType, sortKey, sortDir } = data.ui;
+  const {
+    filterProjectId,
+    filterResourceType,
+    filterResourceTeam,
+    sortKey,
+    sortDir,
+  } = data.ui;
   const filterResourceId = effectiveResourceFilterId(data);
 
   let projects = data.projects;
@@ -112,15 +120,19 @@ export function filteredSortedProjects(data: AppData): Project[] {
     );
     projects = projects.filter((p) => projectIds.has(p.id));
   }
-  if (filterResourceType) {
-    const typeResourceIds = new Set(
+  if (filterResourceType || filterResourceTeam) {
+    const typedResourceIds = new Set(
       data.resources
-        .filter((r) => r.type === filterResourceType)
+        .filter(
+          (r) =>
+            (!filterResourceType || r.type === filterResourceType) &&
+            (!filterResourceTeam || r.team === filterResourceTeam)
+        )
         .map((r) => r.id)
     );
     const projectIds = new Set(
       data.assignments
-        .filter((a) => typeResourceIds.has(a.resourceId))
+        .filter((a) => typedResourceIds.has(a.resourceId))
         .map((a) => a.projectId)
     );
     projects = projects.filter((p) => projectIds.has(p.id));
@@ -184,9 +196,15 @@ function resourceSortValue(
   }
 }
 
-/** Resources as the baseline unit, filtered by shared project/resource/type filters. */
+/** Resources as the baseline unit, filtered by shared project/resource/type/team filters. */
 export function filteredSortedResources(data: AppData) {
-  const { filterProjectId, filterResourceType, sortKey, sortDir } = data.ui;
+  const {
+    filterProjectId,
+    filterResourceType,
+    filterResourceTeam,
+    sortKey,
+    sortDir,
+  } = data.ui;
   const filterResourceId = effectiveResourceFilterId(data);
 
   let resources = data.resources;
@@ -195,6 +213,9 @@ export function filteredSortedResources(data: AppData) {
   }
   if (filterResourceType) {
     resources = resources.filter((r) => r.type === filterResourceType);
+  }
+  if (filterResourceTeam) {
+    resources = resources.filter((r) => r.team === filterResourceTeam);
   }
   if (filterProjectId) {
     const ids = new Set(

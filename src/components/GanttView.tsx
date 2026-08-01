@@ -191,8 +191,10 @@ export interface GanttRow {
   color?: string;
   /** Single-day marker (optional) */
   milestone?: boolean;
-  /** Stronger bar for project rollup */
+  /** Stronger bar for project / assignment rollup */
   emphasis?: boolean;
+  /** Lighter, inset bar for task rows (vs project stints) */
+  variant?: "project" | "task";
   /** Multiple bars on one row (e.g. resource with several allocations) */
   bars?: GanttBar[];
 }
@@ -210,7 +212,7 @@ interface GanttViewProps {
     anchor: { top: number; left: number } | null
   ) => void;
   selectedBarId?: string | null;
-  /** Fires when the visible timeline window changes (scale, nav, slider). */
+  /** Fires when the visible timeline window changes (scale, nav, scrollbar). */
   onRangeChange?: (range: { start: string; end: string }) => void;
 }
 
@@ -228,6 +230,8 @@ export function GanttView({
   const scale = data.ui.ganttScale;
   const headerRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
+  const hScrollRef = useRef<HTMLDivElement>(null);
+  const syncingHScroll = useRef(false);
   const [contentWidth, setContentWidth] = useState(MIN_CONTENT_WIDTH);
   const { domainStart, domainEnd } = useMemo(() => domainBounds(), []);
   const [rangeStart, setRangeStart] = useState(() =>
@@ -284,11 +288,45 @@ export function GanttView({
     [scale, rangeStart, rangeEnd]
   );
 
-  const sliderMax = Math.max(0, daysBetween(domainStart, domainEnd) + 1 - spanDays);
+  const domainDays = daysBetween(domainStart, domainEnd) + 1;
+  const sliderMax = Math.max(0, domainDays - spanDays);
   const sliderValue = Math.min(
     sliderMax,
     Math.max(0, daysBetween(domainStart, rangeStart))
   );
+
+  /** Inner width so the native thumb ≈ visible window / domain. */
+  const hScrollInnerWidth =
+    sliderMax > 0
+      ? Math.max(
+          contentWidth + 1,
+          Math.round(contentWidth * (domainDays / spanDays))
+        )
+      : contentWidth;
+
+  useEffect(() => {
+    const el = hScrollRef.current;
+    if (!el || sliderMax <= 0) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) return;
+    const target = (sliderValue / sliderMax) * maxScroll;
+    if (Math.abs(el.scrollLeft - target) <= 1) return;
+    syncingHScroll.current = true;
+    el.scrollLeft = target;
+    requestAnimationFrame(() => {
+      syncingHScroll.current = false;
+    });
+  }, [sliderValue, sliderMax, hScrollInnerWidth, scale]);
+
+  function handleHScroll() {
+    const el = hScrollRef.current;
+    if (!el || syncingHScroll.current || sliderMax <= 0) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll <= 0) return;
+    const offset = Math.round((el.scrollLeft / maxScroll) * sliderMax);
+    const next = addDays(domainStart, offset);
+    moveTo(scale === "year" ? startOfMonth(next) : next);
+  }
 
   const totalWidth = contentWidth;
   const pxPerDay = totalWidth / spanDays;
@@ -460,7 +498,7 @@ export function GanttView({
                   return (
                     <div
                       key={bar.id}
-                      className={`${styles.bar} ${bar.milestone ? styles.milestone : ""} ${row.emphasis ? styles.emphasisBar : ""} ${clickable ? styles.clickable : ""} ${selected ? styles.selected : ""} ${kindClass}`}
+                      className={`${styles.bar} ${bar.milestone ? styles.milestone : ""} ${row.emphasis || row.variant === "project" ? styles.emphasisBar : ""} ${row.variant === "task" ? styles.taskBar : ""} ${clickable ? styles.clickable : ""} ${selected ? styles.selected : ""} ${kindClass}`}
                       style={{
                         ...style,
                         ...(isMeta
@@ -515,28 +553,22 @@ export function GanttView({
         </div>
       </div>
 
-      <div className={styles.sliderBar}>
-        <span className={styles.sliderEdge}>
-          {formatDate(domainStart)}
-        </span>
-        <input
-          type="range"
-          className={styles.slider}
-          min={0}
-          max={sliderMax}
-          step={1}
-          value={sliderValue}
-          aria-label="Timeline window position"
-          onChange={(e) => {
-            const offset = Number(e.target.value);
-            const next = addDays(domainStart, offset);
-            moveTo(scale === "year" ? startOfMonth(next) : next);
-          }}
+      <div
+        className={styles.hScrollBar}
+        ref={hScrollRef}
+        onScroll={handleHScroll}
+        title={`${formatDate(rangeStart)} → ${formatDate(rangeEnd)}`}
+        aria-label="Timeline horizontal scroll"
+        role="scrollbar"
+        aria-orientation="horizontal"
+        aria-valuemin={0}
+        aria-valuemax={sliderMax}
+        aria-valuenow={sliderValue}
+      >
+        <div
+          className={styles.hScrollInner}
+          style={{ width: hScrollInnerWidth }}
         />
-        <span className={styles.sliderEdge}>{formatDate(domainEnd)}</span>
-        <span className={styles.sliderWindow} title="Visible window">
-          {formatDate(rangeStart)} → {formatDate(rangeEnd)}
-        </span>
       </div>
     </div>
   );

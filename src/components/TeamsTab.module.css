@@ -1,0 +1,220 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.48fr) minmax(0, 0.52fr);
+  flex: 1;
+  min-height: 0;
+}
+
+.gridPane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  min-height: var(--toolbar-height);
+  padding: 0.4rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  box-sizing: border-box;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  height: var(--toolbar-height);
+  min-height: var(--toolbar-height);
+  padding: 0 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.treeActions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.ghost {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.72rem;
+  padding: 0.22rem 0.5rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ghost:hover {
+  background: var(--row-hover);
+}
+
+.gridHeader {
+  display: flex;
+  overflow: hidden;
+  height: var(--header-height);
+  min-height: var(--header-height);
+  border-bottom: 1px solid var(--border);
+  background: var(--header-bg);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.th {
+  display: flex;
+  align-items: center;
+  height: var(--header-height);
+  padding: 0 0.45rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-right: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.gridBody {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+}
+
+.block {
+  /* rows are fixed height for Gantt sync */
+}
+
+.tr {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  /* Match GanttView .row: content-box height + 1px border (not border-box). */
+  height: var(--row-height);
+  min-height: var(--row-height);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tr:hover {
+  background: var(--row-hover);
+}
+
+.teamRow {
+  background: rgba(47, 111, 94, 0.06);
+}
+
+.teamRow:hover {
+  background: rgba(47, 111, 94, 0.1);
+}
+
+.memberRow {
+  background: var(--surface);
+}
+
+.td {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 0.45rem;
+  font-size: 0.8rem;
+  border-right: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.num {
+  justify-content: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+
+.teamName {
+  font-weight: 650;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memberName {
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toggle {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.7rem;
+  width: 1.4rem;
+  flex-shrink: 0;
+  padding: 0;
+  margin-right: 0.35rem;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  color: var(--ink);
+}
+
+.toggleSpacer {
+  display: inline-block;
+  width: 1.4rem;
+  flex-shrink: 0;
+  margin-right: 0.35rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.emphasis {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.busy {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+.empty {
+  padding: 2rem 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+
+  .gridPane {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    max-height: 45vh;
+  }
+
+}

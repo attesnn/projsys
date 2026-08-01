@@ -37,6 +37,7 @@ function normalizeUi(ui: Partial<AppData["ui"]> | undefined): AppData["ui"] {
     filterProjectId: ui?.filterProjectId ?? "",
     filterResourceId: ui?.filterResourceId ?? "",
     filterResourceType: ui?.filterResourceType ?? "",
+    filterResourceTeam: ui?.filterResourceTeam ?? "",
     sortKey:
       sortKey && validSortKeys.includes(sortKey as SortKey)
         ? (sortKey as SortKey)
@@ -100,11 +101,14 @@ function migrateTask(task: Task & { due?: string }): Task {
   };
 }
 
-function migrateResource(resource: Resource & { notes?: string }): Resource {
+function migrateResource(
+  resource: Resource & { notes?: string; team?: string }
+): Resource {
   return {
     id: resource.id,
     name: resource.name,
     type: resource.type,
+    team: resource.team ?? "",
     notes: resource.notes ?? "",
   };
 }
@@ -251,6 +255,7 @@ function ensureResource(
     id: createId("res"),
     name: name || "Unnamed resource",
     type: type || "",
+    team: "",
     notes: "",
   };
   return {
@@ -443,6 +448,13 @@ export function setFilterResourceType(
   return { ...data, ui: { ...data.ui, filterResourceType } };
 }
 
+export function setFilterResourceTeam(
+  data: AppData,
+  filterResourceTeam: string
+): AppData {
+  return { ...data, ui: { ...data.ui, filterResourceTeam } };
+}
+
 export function setSort(
   data: AppData,
   sortKey: SortKey,
@@ -476,6 +488,7 @@ export function clearFilters(data: AppData): AppData {
       filterProjectId: "",
       filterResourceId: "",
       filterResourceType: "",
+      filterResourceTeam: "",
     },
   };
 }
@@ -525,6 +538,7 @@ export function addResource(data: AppData): AppData {
     id: createId("res"),
     name: "New resource",
     type: "Unassigned",
+    team: "",
     notes: "",
   };
   let next = appendLog(data, "resource", resource.id, "_created", "", resource.name);
@@ -534,7 +548,7 @@ export function addResource(data: AppData): AppData {
 export function updateResourceField(
   data: AppData,
   resourceId: string,
-  field: "name" | "type" | "notes",
+  field: "name" | "type" | "team" | "notes",
   value: string
 ): AppData {
   const resource = data.resources.find((r) => r.id === resourceId);
