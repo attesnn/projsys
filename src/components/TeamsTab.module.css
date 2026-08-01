@@ -112,7 +112,7 @@
 .td {
   display: flex;
   align-items: center;
-  height: var(--row-height);
+  height: 100%;
   padding: 0 0.45rem;
   font-size: 0.8rem;
   border-right: 1px solid var(--border-subtle);
