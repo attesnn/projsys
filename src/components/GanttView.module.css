@@ -236,25 +236,6 @@
   min-width: 0;
 }
 
-.gapBar {
-  top: 10px;
-  height: calc(var(--row-height) - 20px);
-  background: repeating-linear-gradient(
-    -45deg,
-    rgba(47, 111, 94, 0.12),
-    rgba(47, 111, 94, 0.12) 3px,
-    rgba(47, 111, 94, 0.04) 3px,
-    rgba(47, 111, 94, 0.04) 7px
-  );
-  border: 1px dashed rgba(47, 111, 94, 0.45);
-  color: var(--accent);
-}
-
-.gapBar .barLabel {
-  color: var(--accent);
-  font-weight: 500;
-}
-
 .overloadBar {
   top: 4px;
   height: calc(var(--row-height) - 8px);
@@ -275,37 +256,16 @@
   font-size: 0.85rem;
 }
 
-.sliderBar {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.hScrollBar {
   flex-shrink: 0;
-  height: 36px;
-  padding: 0 0.75rem;
+  height: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
   border-top: 1px solid var(--border);
   background: var(--surface);
   box-sizing: border-box;
 }
 
-.slider {
-  flex: 1;
-  min-width: 0;
-  height: 1.1rem;
-  cursor: pointer;
-  accent-color: var(--accent);
-}
-
-.sliderEdge {
-  flex-shrink: 0;
-  font-size: 0.62rem;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.sliderWindow {
-  flex-shrink: 0;
-  font-size: 0.62rem;
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+.hScrollInner {
+  height: 1px;
 }

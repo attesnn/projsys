@@ -5,7 +5,6 @@ import { useStore } from "@/context/StoreContext";
 import {
   analyzeResourceAllocation,
   formatAllocPct,
-  freeGapsInWindow,
   overloadSpansInWindow,
 } from "@/lib/allocation";
 import {
@@ -188,19 +187,6 @@ export function ResourcesTab() {
         };
       });
 
-      const gapBars: GanttBar[] = freeGapsInWindow(
-        row.assignments,
-        ganttWindow.start,
-        ganttWindow.end
-      ).map((gap, i) => ({
-        id: `gap_${row.resource.id}_${i}`,
-        start: gap.start,
-        end: gap.end,
-        label: "Open",
-        sublabel: "empty slot",
-        kind: "gap",
-      }));
-
       const overloadBars: GanttBar[] = overloadSpansInWindow(
         row.assignments,
         ganttWindow.start,
@@ -218,7 +204,7 @@ export function ResourcesTab() {
         id: row.resource.id,
         label: row.resource.name,
         sublabel: formatAllocPct(row.allocation.allocPct),
-        bars: [...gapBars, ...assignmentBars, ...overloadBars],
+        bars: [...assignmentBars, ...overloadBars],
       });
 
       if (!expandedResources.has(row.resource.id)) continue;

@@ -154,7 +154,7 @@ In **resource** role, queries force the acting person as the resource filter (ma
 - **Alloc %** = weekdays with ≥1 work assignment ÷ weekdays in window (weekends ignored). Time off does not count as work.
 - **Free %** = weekdays with no assignment at all (open capacity). Highlighted when ≥20%.
 - **Busy %** = weekdays with ≥2 overlapping work assignments (heavy load). Highlighted when >0.
-- Gantt resource row: assignment bars + hatched **Open** gap bars (`kind: "gap"`) for empty stretches + **Heavy** overlay (`kind: "overload"`) where double-booked. Window comes from Gantt `onRangeChange`.
+- Gantt resource row: assignment bars + **Heavy** overlay (`kind: "overload"`) where double-booked. Window comes from Gantt `onRangeChange`. (Open/empty-slot gap bars removed from the Gantt; Free % column still shows open capacity.)
 - Expand resource (▶) → **Assignments as project stints** (sorted by start; dates read-only) → **Tasks** (title / start / end editable).
 - **Manager:** Resource name/type editable; Notes editable; `+` add stint / add task; delete stint/task.
 - **Resource self:** single row (themselves); name/type locked; Notes + own task fields editable; no add/delete stint or task; tree auto-expanded.
@@ -218,11 +218,11 @@ src/
     StakeholderSwitcher.tsx    # View as manager / resource (pick person)
     FilterSortBar.tsx          # shared filters/sort
     ProjectsTab.tsx
-    ResourcesTab.tsx           # allocations + Alloc/Free/Busy + Open/Heavy Gantt + role locks
+    ResourcesTab.tsx           # allocations + Alloc/Free/Busy + Heavy Gantt + role locks
     AvailableResourcesTab.tsx
     SkillsTab.tsx
     TasksTab.tsx               # flat tasks; resource-self locks reassignment/CRUD
-    GanttView.tsx              # scales, fit-to-width, slider, gap/overload kinds, onRangeChange
+    GanttView.tsx              # scales, fit-to-width, h-scrollbar, overload kind, onRangeChange
     AssignmentEditPopover.tsx  # edit project / start / end from Gantt click (Projects, manager)
     EditableCell.tsx           # double-click / F2; Enter commit; Esc cancel; history ↻
     HistoryPopover.tsx
@@ -258,7 +258,7 @@ Respect `data.ui` filters in every list tab. Resource id filtering goes through 
 Workday math over a window `[start, end]` (weekends excluded from denominator and counters):
 
 - `analyzeResourceAllocation(assignments, windowStart, windowEnd)` → Alloc % / Free % / Busy % (+ counts, `peakLoad`)
-- `freeGapsInWindow(...)` → contiguous empty calendar spans (for Gantt **Open** bars)
+- `freeGapsInWindow(...)` → contiguous empty calendar spans (helper retained; not drawn on Gantt)
 - `overloadSpansInWindow(...)` → spans with ≥2 concurrent work assignments (for **Heavy** bars)
 
 Time off counts as neither work nor free (blocks availability without raising Alloc %).
@@ -273,12 +273,12 @@ Not real auth — demo persona switch only.
 
 - Props: `rows: GanttRow[]`, `bodyRef`, `onBodyScroll`, optional `title`, `hideToolbar`, `onBarClick`, `selectedBarId`, **`onRangeChange({ start, end })`** (fires when the visible window moves — used by Resource allocation metrics).
 - A row may use top-level `start`/`end` **or** `bars: GanttBar[]` (multi-allocation).
-- `GanttBar.kind`: `"assignment"` (default) | `"gap"` (Open capacity) | `"overload"` (Heavy / double-booked). Gap/overload bars are not clickable.
+- `GanttBar.kind`: `"assignment"` (default) | `"overload"` (Heavy / double-booked). Overload bars are not clickable. (`"gap"` remains typed but is unused in the UI.)
 - Parent must keep **left pane row count === `rows.length`** and sync `scrollTop` both ways.
 - **Scales** (`ui.ganttScale`, default `month`): Week | Month | Quarter | Year — shared across Projects and Resource allocation; persisted in Postgres with `AppData`.
   - Timeline **fits pane width** (`ResizeObserver` → `pxPerDay = width / spanDays`); window length is ~1 week / 30 days / 91 days / 12 months.
   - **← / →** nudge by ~1/10 of the window (week ±1 day, month ±3 days, quarter ±9 days, year ±2 months) — sliding window, not a full-period jump.
-  - **Bottom slider** scrubs the window across the timeline domain (~today−60d → today+400d); shows domain edges + visible range.
+  - **Bottom horizontal scrollbar** scrubs the window across the timeline domain (~today−60d → today+400d); native scroll thumb sized to the visible window.
   - **Week:** 7 day columns. **Month:** day columns. **Quarter:** week columns. **Year:** month columns labeled with year (e.g. `Jan 2026`).
   - Today (and scale change) snaps `rangeStart` to the active scale’s alignment (Mon / month start / quarter start / Jan 1).
 - Gantt pane must be height-constrained (`min-height: 0`, `height: 100%`, `overflow: hidden` on root **and** left panes) so the body scrolls and stays synced with the left pane.
@@ -308,9 +308,10 @@ Not real auth — demo persona switch only.
 8. Assignment **start / end** editable on **Projects** (inline + Gantt popover). On **Resource allocation**, expand edits **task** title/start/end; assignment dates stay read-only.  
 9. **`allocationPct` / Peak % / Free % removed** as stored assignment fields — bookings are date ranges only. Resource allocation now shows **derived** workday Alloc % / Free % / Busy % for the visible Gantt window (weekends ignored). Available resources status remains Available vs Booked for today.  
 10. Seed scaled to **~50 resources** and **~1 year** of stints/tasks; **Time off** project + Gantt weekend shading; dates **randomized** each reset with **idle gaps** and occasional deliberate double-books.  
-11. Gantt is **fit-to-width** with Week/Month/Quarter/Year scales, incremental nav (~1/10 window), year labels on month ticks, and a **bottom scrub slider** — not a fixed 12×72px week strip.  
+11. Gantt is **fit-to-width** with Week/Month/Quarter/Year scales, incremental nav (~1/10 window), year labels on month ticks, and a **bottom horizontal scrollbar** — not a range-input scrubber or fixed week strip.  
 12. Shared **Type** filter (`filterResourceType`) alongside Project/Resource.  
 13. **Stakeholder roles** are a demo switcher (manager vs resource-self), not real auth; resource mode scopes data and limits edits as above.
+14. Resource allocation Gantt no longer draws hatched **Open** empty-slot bars (Free % metrics remain).
 ---
 
 ## Out of scope (v1) — ask before building
