@@ -214,7 +214,8 @@ src/
     dates.ts                   # Gantt timeline math (week/month/quarter/year)
     id.ts                      # createId(prefix)
   components/
-    AppShell.tsx               # tab chrome + stakeholder switcher + reset
+    AppShell.tsx               # tab chrome + stakeholder switcher + Guide + reset
+    GuideDialog.tsx            # header Guide pop-up: domain / metrics / conflicts / roles
     StakeholderSwitcher.tsx    # View as manager / resource (pick person)
     FilterSortBar.tsx          # shared filters/sort
     ProjectsTab.tsx
